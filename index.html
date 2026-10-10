@@ -1,0 +1,2654 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>AgriFlow · Pomegranate Drip &amp; Spray Schedule</title>
+  <meta name="description" content="Mobile-friendly Pomegranate farming schedule with combined table showing both drip fertigation and foliar spray with calendar dates.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================================================
+       1. TOKENS & BETTER-UI SPECIFICATION
+       ========================================================================== */
+    :root {
+      /* Colors: Light Mode */
+      --bg-page: oklch(0.985 0.005 130);
+      --bg-surface: oklch(1 0 0);
+      --bg-surface-subtle: oklch(0.965 0.008 135);
+      --bg-surface-hover: oklch(0.95 0.01 135);
+      --bg-inset: oklch(0.94 0.01 135);
+
+      --text-main: oklch(0.2 0.02 140);
+      --text-muted: oklch(0.46 0.03 140);
+      --text-subtle: oklch(0.62 0.02 140);
+
+      /* Primary Agricultural Tokens */
+      --primary: oklch(0.48 0.15 145);
+      --primary-hover: oklch(0.42 0.16 145);
+      --primary-subtle: oklch(0.95 0.04 145);
+      --primary-border: oklch(0.8 0.08 145);
+
+      /* Drip (Water/Cyan-Blue) Tokens */
+      --drip-bg: oklch(0.96 0.04 235);
+      --drip-border: oklch(0.86 0.08 235);
+      --drip-text: oklch(0.35 0.14 235);
+      --drip-solid: oklch(0.52 0.16 235);
+
+      /* Spray (Foliar/Green) Tokens */
+      --spray-bg: oklch(0.96 0.05 148);
+      --spray-border: oklch(0.85 0.1 148);
+      --spray-text: oklch(0.34 0.13 148);
+      --spray-solid: oklch(0.48 0.15 148);
+
+      /* Borders & Shadows (Exact better-ui 3-layer light shadow) */
+      --border-color: oklch(0.88 0.01 135);
+      --border-subtle: oklch(0.92 0.005 135);
+      --shadow-border:
+        0px 0px 0px 1px oklch(0 0 0 / 0.06),
+        0px 1px 2px -1px oklch(0 0 0 / 0.06),
+        0px 2px 4px 0px oklch(0 0 0 / 0.04);
+      --shadow-border-hover:
+        0px 0px 0px 1px oklch(0 0 0 / 0.08),
+        0px 1px 2px -1px oklch(0 0 0 / 0.08),
+        0px 2px 4px 0px oklch(0 0 0 / 0.06);
+      --shadow-elevation:
+        0px 0px 0px 1px oklch(0 0 0 / 0.06),
+        0px 6px 16px -2px oklch(0 0 0 / 0.1),
+        0px 16px 32px -4px oklch(0 0 0 / 0.08);
+
+      --focus-ring: 0 0 0 2px var(--bg-surface), 0 0 0 4px oklch(0.48 0.15 145 / 0.6);
+    }
+
+    [data-theme="dark"] {
+      --bg-page: oklch(0.14 0.01 140);
+      --bg-surface: oklch(0.18 0.01 140);
+      --bg-surface-subtle: oklch(0.22 0.015 140);
+      --bg-surface-hover: oklch(0.25 0.018 140);
+      --bg-inset: oklch(0.12 0.01 140);
+
+      --text-main: oklch(0.95 0.01 140);
+      --text-muted: oklch(0.72 0.02 140);
+      --text-subtle: oklch(0.55 0.02 140);
+
+      --primary: oklch(0.65 0.16 145);
+      --primary-hover: oklch(0.7 0.17 145);
+      --primary-subtle: oklch(0.25 0.06 145);
+      --primary-border: oklch(0.4 0.09 145);
+
+      --drip-bg: oklch(0.22 0.05 235);
+      --drip-border: oklch(0.38 0.09 235);
+      --drip-text: oklch(0.82 0.09 235);
+      --drip-solid: oklch(0.65 0.16 235);
+
+      --spray-bg: oklch(0.22 0.06 148);
+      --spray-border: oklch(0.38 0.1 148);
+      --spray-text: oklch(0.85 0.1 148);
+      --spray-solid: oklch(0.62 0.16 148);
+
+      --border-color: oklch(0.28 0.015 140);
+      --border-subtle: oklch(0.23 0.01 140);
+      
+      /* Exact better-ui dark shadow tokens: 1px white ring */
+      --shadow-border: 0 0 0 1px oklch(1 0 0 / 0.08);
+      --shadow-border-hover: 0 0 0 1px oklch(1 0 0 / 0.13);
+      --shadow-elevation:
+        0px 0px 0px 1px oklch(1 0 0 / 0.12),
+        0px 8px 28px -4px oklch(0 0 0 / 0.65);
+
+      --focus-ring: 0 0 0 2px var(--bg-surface), 0 0 0 4px oklch(0.65 0.16 145 / 0.7);
+    }
+
+    /* Base Reset & Typography */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.5;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-tap-highlight-color: transparent;
+      padding-bottom: 80px;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+    }
+
+    .tabular-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ==========================================================================
+       2. BETTER-UI MOTION & INTERACTION SPECIFICATION
+       ========================================================================== */
+    /* Press scales to 0.96 over 150ms ease-out. Disabled never scales. */
+    .btn, button.btn-action, .chip-filter {
+      transition-property: scale, background-color, border-color, color, box-shadow;
+      transition-duration: 150ms;
+      transition-timing-function: ease-out;
+    }
+
+    .btn:not(:disabled):active,
+    button.btn-action:not(:disabled):active,
+    .chip-filter:not(:disabled):active {
+      scale: 0.96;
+    }
+
+    /* High-frequency interactions: table rows get 100ms background transition */
+    .table-row {
+      transition-property: background-color;
+      transition-duration: 100ms;
+      transition-timing-function: ease-out;
+    }
+
+    /* Hover effects only on hover-capable pointers */
+    @media (hover: hover) {
+      .table-row:hover {
+        background-color: var(--bg-surface-hover);
+      }
+      .card-item:hover {
+        box-shadow: var(--shadow-border-hover);
+      }
+      .btn-primary:hover {
+        background-color: var(--primary-hover);
+      }
+      .btn-secondary:hover {
+        background-color: var(--bg-surface-hover);
+      }
+      .btn-icon:hover {
+        background-color: var(--bg-surface-hover);
+        color: var(--text-main);
+      }
+      .chip-filter:hover {
+        border-color: var(--primary-border);
+      }
+    }
+
+    /* Staged entrance with 100ms intervals */
+    .stagger-item {
+      animation: fade-in 300ms ease-out both;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .stagger-item {
+        animation-name: fade-in-up;
+      }
+    }
+    .stagger-item:nth-child(1) { animation-delay: 0ms; }
+    .stagger-item:nth-child(2) { animation-delay: 100ms; }
+    .stagger-item:nth-child(3) { animation-delay: 200ms; }
+    .stagger-item:nth-child(4) { animation-delay: 300ms; }
+
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fade-in-up {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+        filter: blur(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0px);
+      }
+    }
+
+    /* ==========================================================================
+       3. CONCENTRIC SURFACES & COMPONENT STYLING
+       outerRadius = innerRadius + padding + borderWidth
+       ========================================================================== */
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 16px 20px;
+    }
+
+    /* Header Shell */
+    .app-header {
+      background-color: var(--bg-surface);
+      border: 1px solid transparent;
+      box-shadow: var(--shadow-border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 20px;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--drip-solid), var(--primary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 2px 6px oklch(0.48 0.15 145 / 0.3);
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background-color: var(--primary-subtle);
+      color: var(--primary);
+      border: 1px solid var(--primary-border);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Buttons with Optical Alignment (2px less padding on icon side) */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      height: 38px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      user-select: none;
+      border: 1px solid transparent;
+      padding-inline-start: 16px;
+      padding-inline-end: 16px;
+    }
+
+    .btn.icon-leading {
+      padding-inline-start: 14px;
+      padding-inline-end: 16px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+      box-shadow: 0 1px 2px oklch(0 0 0 / 0.1);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-surface);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-border);
+    }
+
+    .btn-icon {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 10px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-border);
+    }
+
+    .btn:focus-visible, .btn-icon:focus-visible, input:focus-visible, select:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+
+    /* Configuration Panel: Concentric Radius (inner=10px, padding=16px -> outer=26px) */
+    .panel-card {
+      background-color: var(--bg-surface);
+      border-radius: 26px;
+      border: 1px solid transparent;
+      box-shadow: var(--shadow-border);
+      padding: 16px 20px;
+      margin-top: 16px;
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: end;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-control {
+      height: 40px;
+      padding: 0 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-surface-subtle);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      transition-property: border-color, background-color, box-shadow;
+      transition-duration: 150ms;
+      transition-timing-function: ease-out;
+    }
+
+    .form-control:focus {
+      background-color: var(--bg-surface);
+      border-color: var(--primary);
+    }
+
+    /* Stats Overview Bar: Concentric Radius (icon=10px, padding=14px -> outer=24px) */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .stat-card {
+      background-color: var(--bg-surface);
+      border-radius: 24px;
+      border: 1px solid transparent;
+      box-shadow: var(--shadow-border);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .stat-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.drip {
+      background-color: var(--drip-bg);
+      color: var(--drip-solid);
+      border: 1px solid var(--drip-border);
+    }
+
+    .stat-icon.spray {
+      background-color: var(--spray-bg);
+      color: var(--spray-solid);
+      border: 1px solid var(--spray-border);
+    }
+
+    .stat-icon.progress {
+      background-color: var(--primary-subtle);
+      color: var(--primary);
+      border: 1px solid var(--primary-border);
+    }
+
+    .stat-icon.plan {
+      background-color: oklch(0.96 0.04 85);
+      color: oklch(0.48 0.15 75);
+      border: 1px solid oklch(0.88 0.08 85);
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    /* Control Toolbar (Search, Filter, View Modes) */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-chips {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 2px 0;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .chip-filter {
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      box-shadow: var(--shadow-border);
+    }
+
+    .chip-filter.active {
+      background-color: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    .search-box {
+      position: relative;
+      min-width: 220px;
+    }
+
+    .search-input {
+      height: 36px;
+      padding: 0 12px 0 34px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-surface);
+      color: var(--text-main);
+      font-size: 0.85rem;
+      width: 100%;
+      box-shadow: var(--shadow-border);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-subtle);
+      pointer-events: none;
+    }
+
+    .segmented-control {
+      display: inline-flex;
+      background-color: var(--bg-surface-subtle);
+      border-radius: 10px;
+      padding: 3px;
+      border: 1px solid var(--border-color);
+    }
+
+    .segment-btn {
+      height: 30px;
+      padding: 0 12px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition-property: background-color, color, box-shadow;
+      transition-duration: 120ms;
+      transition-timing-function: ease-out;
+    }
+
+    .segment-btn.active {
+      background-color: var(--bg-surface);
+      color: var(--text-main);
+      box-shadow: var(--shadow-border);
+    }
+
+    /* ==========================================================================
+       4. COMBINED TABLE (BOTH DRIP AND SPRAY ON THE TABLE)
+       ========================================================================== */
+    .table-container {
+      background-color: var(--bg-surface);
+      border-radius: 24px;
+      border: 1px solid transparent;
+      box-shadow: var(--shadow-border);
+      margin-top: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .table-scroll-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      width: 100%;
+    }
+
+    table.schedule-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      text-align: left;
+      font-size: 0.88rem;
+      min-width: 820px;
+    }
+
+    .schedule-table thead th {
+      background-color: var(--bg-surface-subtle);
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .schedule-table tbody tr {
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .schedule-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    .schedule-table tbody td {
+      padding: 16px;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .table-row.is-done {
+      background-color: oklch(0.98 0.005 140 / 0.6);
+      opacity: 0.75;
+    }
+    [data-theme="dark"] .table-row.is-done {
+      background-color: oklch(0.16 0.01 140 / 0.6);
+    }
+
+    .table-row.is-today {
+      background-color: oklch(0.5 0.15 145 / 0.05);
+      border-left: 3px solid var(--primary);
+    }
+
+    /* Column Sizing */
+    .col-status {
+      width: 48px;
+      text-align: center;
+      padding-right: 4px !important;
+    }
+
+    .col-date {
+      width: 160px;
+      white-space: nowrap;
+    }
+
+    .col-drip {
+      width: 42%;
+      background-color: oklch(0.6 0.15 235 / 0.02);
+      border-left: 1px solid var(--border-subtle);
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    .col-spray {
+      width: 42%;
+      background-color: oklch(0.5 0.15 148 / 0.02);
+    }
+
+    .col-actions {
+      width: 72px;
+      text-align: right;
+    }
+
+    /* Custom Checkbox */
+    .checkbox-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .checkbox-custom {
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      border: 2px solid var(--border-color);
+      background-color: var(--bg-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: transparent;
+      transition-property: background-color, border-color, color, scale;
+      transition-duration: 150ms;
+      transition-timing-function: ease-out;
+    }
+
+    .checkbox-custom:hover {
+      border-color: var(--primary);
+    }
+
+    .checkbox-wrap input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .checkbox-wrap input[type="checkbox"]:focus-visible + .checkbox-custom {
+      box-shadow: var(--focus-ring);
+    }
+
+    .checkbox-wrap input[type="checkbox"]:checked + .checkbox-custom {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .day-badge {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .date-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Activity Cells */
+    .activity-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .activity-title {
+      font-weight: 600;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+
+    .activity-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .meta-pill {
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .meta-pill.drip {
+      background-color: var(--drip-bg);
+      color: var(--drip-text);
+      border: 1px solid var(--drip-border);
+    }
+
+    .meta-pill.spray {
+      background-color: var(--spray-bg);
+      color: var(--spray-text);
+      border: 1px solid var(--spray-border);
+    }
+
+    .empty-activity {
+      color: var(--text-subtle);
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
+    /* ==========================================================================
+       5. MOBILE CARDS TIMELINE
+       ========================================================================== */
+    .cards-view-container {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .card-item {
+      background-color: var(--bg-surface);
+      border-radius: 28px;
+      border: 1px solid transparent;
+      box-shadow: var(--shadow-border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition-property: box-shadow;
+      transition-duration: 150ms;
+      transition-timing-function: ease-out;
+    }
+
+    .card-item.is-done {
+      opacity: 0.75;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 10px;
+    }
+
+    .card-top-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-dual-body {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 640px) {
+      .card-dual-body {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .card-section {
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-section.drip {
+      background-color: var(--drip-bg);
+      border: 1px solid var(--drip-border);
+    }
+
+    .card-section.spray {
+      background-color: var(--spray-bg);
+      border: 1px solid var(--spray-border);
+    }
+
+    .activity-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .activity-header.drip {
+      color: var(--drip-solid);
+    }
+
+    .activity-header.spray {
+      color: var(--spray-solid);
+    }
+
+    /* ==========================================================================
+       6. MODAL & SCROLLABLE POPUP (FIXED FULL SCROLLABILITY)
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: oklch(0 0 0 / 0.55);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      opacity: 0;
+      visibility: hidden;
+      transition-property: opacity, visibility;
+      transition-duration: 200ms;
+      transition-timing-function: ease-out;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-dialog {
+      background-color: var(--bg-surface);
+      border-radius: 24px;
+      border: 1px solid transparent;
+      box-shadow: var(--shadow-elevation);
+      width: 100%;
+      max-width: 580px;
+      height: 90vh;
+      max-height: 720px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      overscroll-behavior: contain;
+      margin: auto;
+      transform: translateY(14px) scale(0.98);
+      transition-property: transform, opacity;
+      transition-duration: 200ms;
+      transition-timing-function: ease-out;
+    }
+
+    .modal-backdrop.open .modal-dialog {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Modal Form & Scrollable Body: flex container with pinned footer */
+    #taskForm {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      flex: 1 1 auto;
+      overflow: hidden;
+    }
+
+    .modal-body {
+      padding: 18px 20px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1 1 auto;
+      min-height: 0; /* Crucial for flex child scrollability */
+    }
+
+    .modal-footer {
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      border-top: 1px solid var(--border-color);
+      background-color: var(--bg-surface-subtle);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 5;
+    }
+
+    .modal-subcard {
+      border-radius: 14px;
+      padding: 14px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-surface-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .modal-subcard.drip-card {
+      background-color: oklch(0.6 0.15 235 / 0.04);
+      border-color: var(--drip-border);
+    }
+
+    .modal-subcard.spray-card {
+      background-color: oklch(0.5 0.15 148 / 0.04);
+      border-color: var(--spray-border);
+    }
+
+    /* Dynamic Multi-Row Fertilizer Inputs */
+    .fert-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .fert-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .fert-row .form-control {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .fert-row-remove {
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      background: none;
+      border: 1px solid var(--border-color);
+      color: oklch(0.5 0.2 25);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      transition: background-color 120ms ease-out;
+    }
+
+    .fert-row-remove:hover {
+      background-color: oklch(0.95 0.04 25);
+    }
+
+    .fert-add-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: none;
+      border: 1px dashed var(--primary-border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      margin-top: 2px;
+      transition: background-color 120ms ease-out;
+    }
+
+    .fert-add-btn:hover {
+      background-color: var(--primary-subtle);
+    }
+
+    /* Render multi-items as list in table/cards */
+    .fert-items-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .fert-items-list li {
+      font-size: 0.84rem;
+      line-height: 1.35;
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .fert-items-list li::before {
+      content: '•';
+      position: absolute;
+      left: 2px;
+      color: var(--text-subtle);
+      font-weight: 700;
+    }
+
+    /* Delete Confirmation Modal Styles */
+    .delete-dialog {
+      max-width: 420px !important;
+      text-align: center;
+    }
+
+    .delete-dialog .modal-body {
+      padding: 24px 24px 16px;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .delete-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background-color: oklch(0.95 0.05 25);
+      color: oklch(0.55 0.22 25);
+      border: 1px solid oklch(0.85 0.1 25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+    }
+
+    [data-theme="dark"] .delete-icon-wrap {
+      background-color: oklch(0.25 0.08 25);
+      border-color: oklch(0.4 0.12 25);
+      color: oklch(0.7 0.18 25);
+    }
+
+    .delete-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .delete-message {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .delete-preview-card {
+      width: 100%;
+      background-color: var(--bg-surface-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 0.84rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .delete-dialog .modal-footer {
+      justify-content: center;
+      gap: 12px;
+      padding: 16px 24px;
+    }
+
+    .btn-danger {
+      background-color: oklch(0.55 0.22 25);
+      color: white;
+      border: 1px solid transparent;
+      box-shadow: 0 1px 2px oklch(0 0 0 / 0.15);
+    }
+
+    .btn-danger:hover {
+      background-color: oklch(0.48 0.23 25);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      background-color: var(--bg-surface);
+      border-radius: 20px;
+      box-shadow: var(--shadow-border);
+      border: 1px solid transparent;
+      margin-top: 16px;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background-color: white !important;
+        color: black !important;
+        padding-bottom: 0;
+      }
+      .app-header, .toolbar, .config-grid, .btn, .col-actions, .modal-backdrop {
+        display: none !important;
+      }
+      .table-container {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        overflow: visible !important;
+      }
+      table.schedule-table {
+        min-width: 100% !important;
+        font-size: 11pt !important;
+      }
+      .schedule-table th, .schedule-table td {
+        padding: 8px 10px !important;
+        border: 1px solid #ddd !important;
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .header-inner {
+        padding: 10px 14px;
+        gap: 8px;
+      }
+      .container {
+        padding: 12px 14px;
+      }
+      .brand-title span.full-title {
+        display: none;
+      }
+      .badge-pill {
+        display: none;
+      }
+      .btn {
+        height: 36px;
+        font-size: 0.82rem;
+        padding-inline: 12px;
+      }
+      .btn.icon-leading {
+        padding-inline-start: 10px;
+        padding-inline-end: 12px;
+      }
+      .btn-icon {
+        width: 36px;
+        height: 36px;
+      }
+      .config-grid {
+        grid-template-columns: 1fr;
+      }
+      .search-box {
+        width: 100%;
+        order: 3;
+      }
+      .toolbar {
+        gap: 8px;
+      }
+      .view-card-active .table-container {
+        display: none;
+      }
+      .view-card-active .cards-view-container {
+        display: flex;
+      }
+
+      /* Mobile Modal: ensure footer buttons are always pinned and visible */
+      .modal-backdrop {
+        padding: 8px;
+        align-items: flex-end;
+      }
+      .modal-dialog {
+        height: 92vh;
+        max-height: 92vh;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        margin-bottom: 0;
+      }
+      .modal-dialog.delete-dialog {
+        height: auto;
+        border-radius: 20px;
+        margin: auto;
+      }
+      .modal-footer {
+        padding: 12px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       APP HEADER
+       ========================================================================== -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-area">
+        <div class="brand-logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">
+            AgriFlow
+            <span class="full-title text-muted" style="font-weight: 500; font-size: 0.95rem;">· Pomegranate Schedule</span>
+            <span class="badge-pill">Drip + Spray</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="btnOpenAddModal" class="btn btn-primary icon-leading" type="button" aria-label="Add new schedule entry">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Add Task</span>
+        </button>
+
+        <button id="btnOpenShareModal" class="btn btn-secondary icon-leading" type="button" aria-label="Share or export schedule">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+            <polyline points="16 6 12 2 8 6"></polyline>
+            <line x1="12" y1="2" x2="12" y2="15"></line>
+          </svg>
+          <span class="hide-mobile">Export</span>
+        </button>
+
+        <button id="themeToggleBtn" class="btn-icon" type="button" aria-label="Toggle theme mode" title="Toggle dark / light theme">
+          <svg id="themeIconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ==========================================================================
+         OVERVIEW METRICS
+         ========================================================================== -->
+    <section class="stats-row stagger-item" aria-label="Schedule statistics">
+
+      <div class="stat-card">
+        <div class="stat-icon drip">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-label">Drip Fertigations</div>
+          <div id="statDripCount" class="stat-value tabular-num">0</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon spray">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-label">Foliar Sprays</div>
+          <div id="statSprayCount" class="stat-value tabular-num">0</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon progress">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 14 14"></polyline>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-label">Completed Tasks</div>
+          <div id="statProgress" class="stat-value tabular-num">0%</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         TOOLBAR (FILTERS, SEARCH, VIEW MODE)
+         ========================================================================== -->
+    <div class="toolbar stagger-item">
+      <div class="filter-chips" role="radiogroup" aria-label="Status filters">
+        <button class="chip-filter active" data-filter="all" type="button">All (<span id="countAll">0</span>)</button>
+        <button class="chip-filter" data-filter="pending" type="button">Pending (<span id="countPending">0</span>)</button>
+        <button class="chip-filter" data-filter="completed" type="button">Completed (<span id="countCompleted">0</span>)</button>
+        <button class="chip-filter" data-filter="today" type="button">Today / Upcoming</button>
+      </div>
+
+      <div class="toolbar-right">
+        <div class="search-box">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="scheduleSearch" class="search-input" placeholder="Search drip, spray, dose..." aria-label="Search schedule">
+        </div>
+
+        <div class="segmented-control" role="group" aria-label="Display View Mode">
+          <button id="viewBtnTable" class="segment-btn active" type="button" title="Combined Table View">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="3" y1="9" x2="21" y2="9"></line>
+              <line x1="3" y1="15" x2="21" y2="15"></line>
+              <line x1="12" y1="3" x2="12" y2="21"></line>
+            </svg>
+            <span>Table</span>
+          </button>
+          <button id="viewBtnCards" class="segment-btn" type="button" title="Mobile Cards Timeline View">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="8" rx="2"></rect>
+              <rect x="3" y="13" width="18" height="8" rx="2"></rect>
+            </svg>
+            <span>Cards</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================================================
+         VIEW 1: COMBINED TABLE (SHOWS BOTH DRIP AND SPRAY ON THE TABLE)
+         ========================================================================== -->
+    <div id="tableContainer" class="table-container stagger-item">
+      <div class="table-scroll-wrapper">
+        <table class="schedule-table" id="farmingTable" aria-label="Combined Pomegranate Drip and Spray Schedule">
+          <thead>
+            <tr>
+              <th class="col-status" scope="col">Done</th>
+              <th class="col-date" scope="col">Date</th>
+              <th class="col-drip" scope="col">
+                <span style="display: inline-flex; align-items: center; gap: 6px; color: var(--drip-solid);">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                  Drip Fertigation (Root Feeding)
+                </span>
+              </th>
+              <th class="col-spray" scope="col">
+                <span style="display: inline-flex; align-items: center; gap: 6px; color: var(--spray-solid);">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path></svg>
+                  Foliar Spray (Canopy Application)
+                </span>
+              </th>
+              <th class="col-actions" scope="col">Edit</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleTableBody">
+            <!-- Dynamic Rows Injected via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==========================================================================
+         VIEW 2: MOBILE CARDS TIMELINE
+         ========================================================================== -->
+    <div id="cardsContainer" class="cards-view-container" aria-label="Card schedule items">
+      <!-- Injected via JS -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyScheduleState" class="empty-state" style="display: none;">
+      <h3 style="font-size: 1.15rem; font-weight: 700;">No schedule entries found</h3>
+      <p style="color: var(--text-muted); max-width: 420px; margin: 6px auto 16px; font-size: 0.9rem;">
+        No tasks match your current filter or search criteria.
+      </p>
+      <button class="btn btn-primary" onclick="clearFilters()">Reset Filters</button>
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       MODAL: ADD / EDIT SCHEDULE ENTRY (FULLY SCROLLABLE POPUP)
+       ========================================================================== -->
+  <div id="taskModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modalTitle" class="modal-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          <span id="modalHeadingText">Add Schedule Entry</span>
+        </h3>
+        <button class="btn-icon" id="btnCloseModal" type="button" aria-label="Close dialog">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="taskForm">
+        <div class="modal-body">
+          <input type="hidden" id="editTaskId">
+
+          <!-- Calendar Date Picker -->
+          <div class="form-group">
+            <label for="inputTaskDate" class="form-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Schedule Date
+            </label>
+            <input type="date" id="inputTaskDate" class="form-control tabular-num" required>
+            <span id="calculatedDayPreview" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;"></span>
+          </div>
+
+          <!-- Section: Drip Fertigation -->
+          <div class="modal-subcard drip-card">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span class="activity-header drip">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                Drip Fertigation
+              </span>
+              <label style="font-size: 0.82rem; display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
+                <input type="checkbox" id="inputDripActive" checked> Include Drip
+              </label>
+            </div>
+
+            <div id="dripFieldsContainer" style="display: flex; flex-direction: column; gap: 10px;">
+              <div class="form-group">
+                <label class="form-label">Fertilizer &amp; Soluble Nutrients</label>
+                <div id="dripFertRows" class="fert-rows">
+                  <!-- Dynamic rows added via JS -->
+                </div>
+                <button type="button" class="fert-add-btn" onclick="addFertilizerRow('dripFertRows')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  Add Fertilizer
+                </button>
+              </div>
+
+              <div class="form-group">
+                <label for="inputDripRuntime" class="form-label">Irrigation Runtime</label>
+                <input type="text" id="inputDripRuntime" class="form-control" placeholder="e.g. 2.5 Hours">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Foliar Spray -->
+          <div class="modal-subcard spray-card">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span class="activity-header spray">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path></svg>
+                Foliar Spray
+              </span>
+              <label style="font-size: 0.82rem; display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
+                <input type="checkbox" id="inputSprayActive" checked> Include Spray
+              </label>
+            </div>
+
+            <div id="sprayFieldsContainer" style="display: flex; flex-direction: column; gap: 10px;">
+              <div class="form-group">
+                <label class="form-label">Formulation &amp; Chemicals</label>
+                <div id="sprayFertRows" class="fert-rows">
+                  <!-- Dynamic rows added via JS -->
+                </div>
+                <button type="button" class="fert-add-btn" onclick="addFertilizerRow('sprayFertRows')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  Add Chemical
+                </button>
+              </div>
+
+              <div class="form-group">
+                <label for="inputSprayDose" class="form-label">Dosage / Rate</label>
+                <input type="text" id="inputSprayDose" class="form-control" placeholder="e.g. 2.5 g / Liter of water">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelModal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveTask">Save Entry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: EXPORT / SHARE MODAL
+       ========================================================================== -->
+  <div id="shareModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 id="shareTitle" class="modal-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+            <polyline points="16 6 12 2 8 6"></polyline>
+            <line x1="12" y1="2" x2="12" y2="15"></line>
+          </svg>
+          Export &amp; Share
+        </h3>
+        <button class="btn-icon" id="btnCloseShareModal" type="button" aria-label="Close dialog">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-subcard">
+          <strong style="font-size: 0.9rem;">WhatsApp Today/Next Task Message:</strong>
+          <pre id="whatsAppPreviewText" class="tabular-num" style="background-color: var(--bg-inset); padding: 12px; border-radius: 8px; font-size: 0.8rem; white-space: pre-wrap; line-height: 1.45; border: 1px solid var(--border-color);"></pre>
+          <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <button id="btnCopyWhatsAppText" class="btn btn-secondary icon-leading" type="button" style="height: 34px; font-size: 0.82rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span id="copyFeedbackText">Copy Message</span>
+            </button>
+            <button id="btnDirectSendWhatsApp" class="btn btn-primary icon-leading" type="button" style="height: 34px; font-size: 0.82rem; background-color: #25D366; border-color: #25D366;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.45 0-2.87-.38-4.12-1.11l-.3-.17-3.12.82.83-3.04-.19-.31a8.17 8.17 0 0 1-1.25-4.43c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.24-.75-.67-1.26-1.5-1.4-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.72 4.31 3.81.6.26 1.07.41 1.44.53.61.19 1.16.17 1.6.1.49-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29z"/>
+              </svg>
+              Open WhatsApp
+            </button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button id="btnExportCSV" class="btn btn-secondary icon-leading" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Export CSV
+          </button>
+
+          <button id="btnPrintSchedule" class="btn btn-secondary icon-leading" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Print / PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: CUSTOM DELETE CONFIRMATION DIALOG (BETTER-UI SPEC)
+       ========================================================================== -->
+  <div id="deleteModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal-dialog delete-dialog">
+      <div class="modal-body">
+        <div class="delete-icon-wrap" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </div>
+        <h3 id="deleteModalTitle" class="delete-title">Delete Task?</h3>
+        <p class="delete-message">Are you sure you want to permanently remove this scheduled task from your pomegranate calendar?</p>
+        
+        <div id="deleteTaskPreview" class="delete-preview-card">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCancelDelete">Cancel</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmDelete">Delete Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       JAVASCRIPT: POMEGRANATE ONLY APPLICATION LOGIC
+       ========================================================================== -->
+  <script>
+    /* --------------------------------------------------------------------------
+       1. POMEGRANATE DRIP & SPRAY MASTER SCHEDULE
+       -------------------------------------------------------------------------- */
+    const POMEGRANATE_SCHEDULE_DEFAULT = [
+      {
+        id: 'pom-1',
+        day: 1,
+        done: true,
+        drip: {
+          items: ['Hydrogen Peroxide with Silver (1.5 Liters/acre)'],
+          runtime: '1.5 Hours'
+        },
+        spray: {
+          items: ['Bordeaux Mixture (1%) / Copper Oxychloride 50% WP'],
+          dose: '3.0 g / Liter of water'
+        }
+      },
+      {
+        id: 'pom-2',
+        day: 10,
+        done: true,
+        drip: {
+          items: ['12:61:00 (MAP) 4.0 kg', 'Humic Acid 98% (500g)'],
+          runtime: '2.0 Hours'
+        },
+        spray: {
+          items: ['Chlorantraniliprole 18.5% SC'],
+          dose: '0.4 ml / Liter of water'
+        }
+      },
+      {
+        id: 'pom-3',
+        day: 20,
+        done: false,
+        drip: {
+          items: ['19:19:19 (4.0 kg)', 'Zinc Chelate EDTA 12% (500g)'],
+          runtime: '2.5 Hours'
+        },
+        spray: {
+          items: ['Gibberellic Acid (GA3) 40 ppm', 'Urea'],
+          dose: '1g / 25L + 10g / L'
+        }
+      },
+      {
+        id: 'pom-4',
+        day: 30,
+        done: false,
+        drip: {
+          items: ['12:61:00 (5.0 kg)', 'Magnesium Sulphate (3.0 kg)'],
+          runtime: '2.5 Hours'
+        },
+        spray: {
+          items: ['Flonicamid 50% WG', 'Neem Oil 10,000 ppm'],
+          dose: '0.4 g/L + 2.0 ml/L'
+        }
+      },
+      {
+        id: 'pom-5',
+        day: 42,
+        done: false,
+        drip: {
+          items: ['00:52:34 (MKP) 5.0 kg', 'Solubor (Boron 20%) 250g'],
+          runtime: '2.5 Hours'
+        },
+        spray: {
+          items: ['Amino Acid Complex 50%', 'Nitrobenzene 20%'],
+          dose: '2.0 ml/L + 1.5 ml/L'
+        }
+      },
+      {
+        id: 'pom-6',
+        day: 55,
+        done: false,
+        drip: {
+          items: ['13:40:13 (4.0 kg)', 'Calcium Nitrate (4.0 kg)'],
+          runtime: '2.5 Hours'
+        },
+        spray: {
+          items: ['Azoxystrobin 18.2% + Difenoconazole 11.4% SC'],
+          dose: '1.0 ml / Liter of water'
+        }
+      },
+      {
+        id: 'pom-7',
+        day: 70,
+        done: false,
+        drip: {
+          items: ['13:00:45 (Potassium Nitrate) 5.0 kg', 'Boron (200g)'],
+          runtime: '3.0 Hours'
+        },
+        spray: {
+          items: ['Spinetoram 11.7% SC'],
+          dose: '0.8 ml / Liter of water'
+        }
+      },
+      {
+        id: 'pom-8',
+        day: 85,
+        done: false,
+        drip: {
+          items: ['00:52:34 (4.0 kg)', '13:00:45 (4.0 kg)'],
+          runtime: '3.0 Hours'
+        },
+        spray: {
+          items: ['Calcium Chelate', 'Foliar Boron 20%'],
+          dose: '1.5 g / Liter of water'
+        }
+      },
+      {
+        id: 'pom-9',
+        day: 100,
+        done: false,
+        drip: {
+          items: ['Calcium Nitrate (5.0 kg/acre)'],
+          runtime: '2.5 Hours'
+        },
+        spray: {
+          items: ['Streptomycin Sulphate 90%', 'Copper Oxychloride'],
+          dose: '0.5 g/L + 2.5 g/L'
+        }
+      },
+      {
+        id: 'pom-10',
+        day: 115,
+        done: false,
+        drip: {
+          items: ['13:00:45 (6.0 kg)', 'Magnesium Sulphate (3.0 kg)'],
+          runtime: '3.0 Hours'
+        },
+        spray: {
+          items: ['Flonicamid 50% WG'],
+          dose: '0.4 g / Liter of water'
+        }
+      },
+      {
+        id: 'pom-11',
+        day: 130,
+        done: false,
+        drip: {
+          items: ['00:00:50 (Potassium Sulphate - SOP) 6.0 kg'],
+          runtime: '3.0 Hours'
+        },
+        spray: {
+          items: ['Potassium Phosphite (Foliar)'],
+          dose: '2.5 ml / Liter of water'
+        }
+      },
+      {
+        id: 'pom-12',
+        day: 145,
+        done: false,
+        drip: {
+          items: ['00:00:50 (SOP) 7.0 kg/acre'],
+          runtime: '3.0 Hours'
+        },
+        spray: {
+          items: ['Chelated Micronutrient Grade II'],
+          dose: '2.0 g / Liter of water'
+        }
+      },
+      {
+        id: 'pom-13',
+        day: 160,
+        done: false,
+        drip: {
+          items: ['00:00:50 (SOP) 5.0 kg/acre'],
+          runtime: '2.5 Hours'
+        },
+        spray: {
+          items: ['Potassium Silicate (Foliar Silica Shield)'],
+          dose: '2.5 ml / Liter of water'
+        }
+      }
+    ];
+
+    /* Helper: get display text from items array (join with ' + ') — handles legacy title string too */
+    function getItemsText(obj) {
+      if (!obj) return '';
+      if (obj.items && Array.isArray(obj.items)) return obj.items.filter(s => s.trim()).join(' + ');
+      if (obj.title) return obj.title; // legacy fallback
+      return '';
+    }
+
+    /* Helper: get items array from object — handles legacy title string */
+    function getItemsArray(obj) {
+      if (!obj) return [];
+      if (obj.items && Array.isArray(obj.items)) return obj.items.filter(s => s.trim());
+      if (obj.title) return obj.title.split(' + ').map(s => s.trim()).filter(Boolean);
+      return [];
+    }
+
+    /* Helper: check if object has items */
+    function hasItems(obj) {
+      return getItemsArray(obj).length > 0;
+    }
+
+    /* --------------------------------------------------------------------------
+       2. APPLICATION STATE
+       -------------------------------------------------------------------------- */
+    let cycleStartDate = new Date().toISOString().split('T')[0];
+    let scheduleData = [];
+    let activeFilter = 'all';
+    let searchQuery = '';
+    let currentViewMode = 'table';
+
+    /* --------------------------------------------------------------------------
+       3. THEME SWITCH WITH TRANSITION SUPPRESSION (BETTER-UI SPEC)
+       -------------------------------------------------------------------------- */
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const targetTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+      const style = document.createElement('style');
+      style.append(document.createTextNode('*,*::before,*::after{transition:none !important}'));
+      document.head.append(style);
+
+      void document.body.offsetHeight;
+
+      document.documentElement.setAttribute('data-theme', targetTheme);
+      localStorage.setItem('agriflow_pomegranate_theme', targetTheme);
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => style.remove());
+      });
+    }
+
+    /* --------------------------------------------------------------------------
+       4. DATE CALCULATION
+       -------------------------------------------------------------------------- */
+    function calculateCalendarDate(startStr, dayOffset) {
+      if (!startStr) return { iso: '', formatted: 'Day ' + dayOffset, weekday: '' };
+      const [year, month, day] = startStr.split('-').map(Number);
+      const baseDate = new Date(year, month - 1, day);
+      baseDate.setDate(baseDate.getDate() + (dayOffset - 1));
+
+      const dayOfMonth = baseDate.getDate();
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      
+      const formatted = `${dayOfMonth} ${monthNames[baseDate.getMonth()]} ${baseDate.getFullYear()}`;
+      const weekday = dayNames[baseDate.getDay()];
+      const isoStr = baseDate.toISOString().split('T')[0];
+
+      return {
+        iso: isoStr,
+        formatted: formatted,
+        weekday: weekday,
+        fullLabel: `${formatted} (${weekday})`
+      };
+    }
+
+    function isSameOrToday(isoDateStr) {
+      const todayIso = new Date().toISOString().split('T')[0];
+      return isoDateStr === todayIso;
+    }
+
+    function isUpcomingOrToday(isoDateStr) {
+      const todayIso = new Date().toISOString().split('T')[0];
+      return isoDateStr >= todayIso;
+    }
+
+    /* --------------------------------------------------------------------------
+       5. RENDERING (BOTH DRIP AND SPRAY ON THE TABLE)
+       -------------------------------------------------------------------------- */
+    function renderApp() {
+      scheduleData.sort((a, b) => a.day - b.day);
+
+      const filtered = scheduleData.filter(item => {
+        const cal = calculateCalendarDate(cycleStartDate, item.day);
+        
+        if (activeFilter === 'pending' && item.done) return false;
+        if (activeFilter === 'completed' && !item.done) return false;
+        if (activeFilter === 'today') {
+          if (!isUpcomingOrToday(cal.iso)) return false;
+        }
+
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          const matchDay = (`day ${item.day}`).includes(q);
+          const matchDate = cal.formatted.toLowerCase().includes(q) || cal.weekday.toLowerCase().includes(q);
+          const matchDrip = item.drip ? (getItemsText(item.drip) + ' ' + (item.drip.runtime || '')).toLowerCase().includes(q) : false;
+          const matchSpray = item.spray ? (getItemsText(item.spray) + ' ' + (item.spray.dose || '')).toLowerCase().includes(q) : false;
+          if (!matchDay && !matchDate && !matchDrip && !matchSpray) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      // Stats
+      const totalCount = scheduleData.length;
+      const completedCount = scheduleData.filter(i => i.done).length;
+      const pendingCount = totalCount - completedCount;
+      const percent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+      const dripCount = scheduleData.filter(i => hasItems(i.drip)).length;
+      const sprayCount = scheduleData.filter(i => hasItems(i.spray)).length;
+
+      document.getElementById('countAll').textContent = totalCount;
+      document.getElementById('countPending').textContent = pendingCount;
+      document.getElementById('countCompleted').textContent = completedCount;
+      document.getElementById('statDripCount').textContent = dripCount;
+      document.getElementById('statSprayCount').textContent = sprayCount;
+      document.getElementById('statProgress').textContent = `${percent}%`;
+
+      const emptyEl = document.getElementById('emptyScheduleState');
+      const tableWrapper = document.getElementById('tableContainer');
+      const cardsWrapper = document.getElementById('cardsContainer');
+
+      if (filtered.length === 0) {
+        emptyEl.style.display = 'block';
+        tableWrapper.style.display = 'none';
+        cardsWrapper.style.display = 'none';
+        return;
+      } else {
+        emptyEl.style.display = 'none';
+        if (currentViewMode === 'table') {
+          tableWrapper.style.display = 'block';
+          cardsWrapper.style.display = 'none';
+        } else {
+          tableWrapper.style.display = 'none';
+          cardsWrapper.style.display = 'flex';
+        }
+      }
+
+      // Render Table Rows (Both Drip & Spray Side-by-Side)
+      const tbody = document.getElementById('scheduleTableBody');
+      tbody.innerHTML = '';
+
+      filtered.forEach(item => {
+        const cal = calculateCalendarDate(cycleStartDate, item.day);
+        const isToday = isSameOrToday(cal.iso);
+
+        const tr = document.createElement('tr');
+        tr.className = `table-row ${item.done ? 'is-done' : ''} ${isToday ? 'is-today' : ''}`;
+        tr.id = `row-${item.id}`;
+
+        // Status Checkbox
+        const tdStatus = document.createElement('td');
+        tdStatus.className = 'col-status';
+        tdStatus.innerHTML = `
+          <label class="checkbox-wrap" title="${item.done ? 'Mark pending' : 'Mark completed'}">
+            <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleTaskDone('${item.id}', this.checked)">
+            <span class="checkbox-custom">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </span>
+          </label>
+        `;
+
+        // Date Column (Without Day)
+        const tdDate = document.createElement('td');
+        tdDate.className = 'col-date';
+        tdDate.innerHTML = `
+          <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); display: flex; align-items: center; gap: 6px;" class="tabular-num">
+            ${cal.formatted}
+            ${isToday ? '<span class="badge-pill" style="font-size: 0.65rem; padding: 1px 5px;">Today</span>' : ''}
+          </div>
+          <div class="date-sub tabular-num">${cal.weekday}</div>
+        `;
+
+        // Drip Cell (Fertigation)
+        const tdDrip = document.createElement('td');
+        tdDrip.className = 'col-drip';
+        const dripItems = getItemsArray(item.drip);
+        if (dripItems.length > 0) {
+          const itemsHtml = dripItems.length > 1
+            ? `<ul class="fert-items-list">${dripItems.map(it => `<li>${escapeHtml(it)}</li>`).join('')}</ul>`
+            : `<div class="activity-title">${escapeHtml(dripItems[0])}</div>`;
+          tdDrip.innerHTML = `
+            <div class="activity-cell">
+              ${itemsHtml}
+              ${item.drip && item.drip.runtime ? `
+                <div class="activity-meta">
+                  <span class="meta-pill drip">⏱ Runtime: ${escapeHtml(item.drip.runtime)}</span>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        } else {
+          tdDrip.innerHTML = `<div class="empty-activity">No drip scheduled</div>`;
+        }
+
+        // Spray Cell (Foliar)
+        const tdSpray = document.createElement('td');
+        tdSpray.className = 'col-spray';
+        const sprayItems = getItemsArray(item.spray);
+        if (sprayItems.length > 0) {
+          const itemsHtml = sprayItems.length > 1
+            ? `<ul class="fert-items-list">${sprayItems.map(it => `<li>${escapeHtml(it)}</li>`).join('')}</ul>`
+            : `<div class="activity-title">${escapeHtml(sprayItems[0])}</div>`;
+          tdSpray.innerHTML = `
+            <div class="activity-cell">
+              ${itemsHtml}
+              ${item.spray && item.spray.dose ? `
+                <div class="activity-meta">
+                  <span class="meta-pill spray">💧 Dose: ${escapeHtml(item.spray.dose)}</span>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        } else {
+          tdSpray.innerHTML = `<div class="empty-activity">No spray scheduled</div>`;
+        }
+
+        // Actions
+        const tdActions = document.createElement('td');
+        tdActions.className = 'col-actions';
+        tdActions.innerHTML = `
+          <div style="display: flex; gap: 4px; justify-content: flex-end;">
+            <button class="btn-icon" style="width: 32px; height: 32px; border-radius: 8px;" onclick="openEditTaskModal('${item.id}')" title="Edit this task" aria-label="Edit task">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+            <button class="btn-icon" style="width: 32px; height: 32px; border-radius: 8px; color: oklch(0.5 0.2 25);" onclick="openDeleteModal('${item.id}')" title="Delete task" aria-label="Delete task">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        `;
+
+        tr.appendChild(tdStatus);
+        tr.appendChild(tdDate);
+        tr.appendChild(tdDrip);
+        tr.appendChild(tdSpray);
+        tr.appendChild(tdActions);
+
+        tbody.appendChild(tr);
+      });
+
+      // Render Cards View (Mobile Timeline)
+      cardsWrapper.innerHTML = '';
+      filtered.forEach(item => {
+        const cal = calculateCalendarDate(cycleStartDate, item.day);
+        const isToday = isSameOrToday(cal.iso);
+        const cardDripItems = getItemsArray(item.drip);
+        const cardSprayItems = getItemsArray(item.spray);
+
+        const card = document.createElement('article');
+        card.className = `card-item ${item.done ? 'is-done' : ''}`;
+        card.innerHTML = `
+          <div class="card-top">
+            <div class="card-top-left">
+              <label class="checkbox-wrap" title="${item.done ? 'Mark pending' : 'Mark completed'}">
+                <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleTaskDone('${item.id}', this.checked)">
+                <span class="checkbox-custom">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </span>
+              </label>
+              <div>
+                <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center; gap: 6px;" class="tabular-num">
+                  ${cal.formatted}
+                  ${isToday ? '<span class="badge-pill" style="font-size: 0.65rem;">Today</span>' : ''}
+                </div>
+                <div class="date-sub tabular-num">${cal.weekday}</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn-icon" style="width: 32px; height: 32px; border-radius: 8px;" onclick="openEditTaskModal('${item.id}')" aria-label="Edit task">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button class="btn-icon" style="width: 32px; height: 32px; border-radius: 8px; color: oklch(0.5 0.2 25);" onclick="openDeleteModal('${item.id}')" aria-label="Delete task">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="card-dual-body">
+            <!-- Drip Block -->
+            <div class="card-section drip">
+              <div class="activity-header drip">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                Drip Fertigation
+              </div>
+              ${cardDripItems.length > 0 ? `
+                ${cardDripItems.length > 1
+                  ? `<ul class="fert-items-list">${cardDripItems.map(it => `<li>${escapeHtml(it)}</li>`).join('')}</ul>`
+                  : `<div class="activity-title">${escapeHtml(cardDripItems[0])}</div>`
+                }
+                ${item.drip && item.drip.runtime ? `
+                  <div class="activity-meta">
+                    <span class="meta-pill drip">⏱ ${escapeHtml(item.drip.runtime)}</span>
+                  </div>
+                ` : ''}
+              ` : `<div class="empty-activity">No drip scheduled</div>`}
+            </div>
+
+            <!-- Spray Block -->
+            <div class="card-section spray">
+              <div class="activity-header spray">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path></svg>
+                Foliar Spray
+              </div>
+              ${cardSprayItems.length > 0 ? `
+                ${cardSprayItems.length > 1
+                  ? `<ul class="fert-items-list">${cardSprayItems.map(it => `<li>${escapeHtml(it)}</li>`).join('')}</ul>`
+                  : `<div class="activity-title">${escapeHtml(cardSprayItems[0])}</div>`
+                }
+                ${item.spray && item.spray.dose ? `
+                  <div class="activity-meta">
+                    <span class="meta-pill spray">💧 Dose: ${escapeHtml(item.spray.dose)}</span>
+                  </div>
+                ` : ''}
+              ` : `<div class="empty-activity">No spray scheduled</div>`}
+            </div>
+          </div>
+        `;
+        cardsWrapper.appendChild(card);
+      });
+    }
+
+    /* --------------------------------------------------------------------------
+       6. WHATSAPP INSTRUCTION GENERATOR
+       -------------------------------------------------------------------------- */
+    function getNextTaskMessage() {
+      const task = scheduleData.find(item => !item.done) || scheduleData[0];
+      if (!task) return 'No scheduled pomegranate tasks found.';
+      const cal = calculateCalendarDate(cycleStartDate, task.day);
+      let msg = `🌿 *POMEGRANATE FARM TASK - DAY ${task.day} (${cal.formatted.toUpperCase()})*\n`;
+      msg += `------------------------------------\n`;
+      
+      const dripList = getItemsArray(task.drip);
+      if (dripList.length > 0) {
+        msg += `💧 *DRIP FERTIGATION:*\n`;
+        dripList.forEach(it => {
+          msg += `• ${it}\n`;
+        });
+        if (task.drip && task.drip.runtime) msg += `⏱ Runtime: ${task.drip.runtime}\n`;
+        msg += `\n`;
+      }
+
+      const sprayList = getItemsArray(task.spray);
+      if (sprayList.length > 0) {
+        msg += `🌿 *FOLIAR SPRAY:*\n`;
+        sprayList.forEach(it => {
+          msg += `• ${it}\n`;
+        });
+        if (task.spray && task.spray.dose) msg += `💧 Dose: ${task.spray.dose}\n`;
+        msg += `\n`;
+      }
+
+      msg += `✅ Please confirm once application is done.`;
+      return msg;
+    }
+
+    /* --------------------------------------------------------------------------
+       7. ACTIONS & CRUD OPERATIONS
+       -------------------------------------------------------------------------- */
+    function toggleTaskDone(id, isDone) {
+      const task = scheduleData.find(t => t.id === id);
+      if (task) {
+        task.done = isDone;
+        saveToLocalStorage();
+        renderApp();
+      }
+    }
+
+    function calculateDayFromDate(dateStr, startStr) {
+      if (!dateStr || !startStr) return 1;
+      const [y1, m1, d1] = dateStr.split('-').map(Number);
+      const [y2, m2, d2] = startStr.split('-').map(Number);
+      const date1 = new Date(y1, m1 - 1, d1);
+      const date2 = new Date(y2, m2 - 1, d2);
+      const diffTime = date1.getTime() - date2.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays >= 0 ? diffDays + 1 : 1;
+    }
+
+    function updateCalculatedDayPreview() {
+      const dateVal = document.getElementById('inputTaskDate').value;
+      if (dateVal) {
+        const [year, month, dayNum] = dateVal.split('-').map(Number);
+        const dt = new Date(year, month - 1, dayNum);
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const formatted = `${dayNum} ${monthNames[dt.getMonth()]} ${dt.getFullYear()} (${dayNames[dt.getDay()]})`;
+        document.getElementById('calculatedDayPreview').textContent = `📅 ${formatted}`;
+      } else {
+        document.getElementById('calculatedDayPreview').textContent = '';
+      }
+    }
+
+    function createFertilizerRowElement(containerId, value = '', placeholder = '') {
+      const row = document.createElement('div');
+      row.className = 'fert-row';
+      const defaultPh = containerId === 'dripFertRows' 
+        ? 'e.g. 19:19:19 (4 kg/acre)' 
+        : 'e.g. Copper Oxychloride 50% WP (2.5 g/L)';
+      
+      row.innerHTML = `
+        <input type="text" class="form-control fert-input" placeholder="${placeholder || defaultPh}" value="${escapeHtml(value)}">
+        <button type="button" class="fert-row-remove" title="Remove line" aria-label="Remove line">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      `;
+
+      row.querySelector('.fert-row-remove').addEventListener('click', () => {
+        const container = document.getElementById(containerId);
+        if (container.children.length > 1) {
+          row.remove();
+        } else {
+          // If only 1 row left, clear its text instead of removing
+          row.querySelector('.fert-input').value = '';
+        }
+      });
+
+      return row;
+    }
+
+    function addFertilizerRow(containerId, value = '') {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const row = createFertilizerRowElement(containerId, value);
+      container.appendChild(row);
+      if (!value) {
+        row.querySelector('.fert-input').focus();
+      }
+    }
+
+    function populateFertilizerRows(containerId, items = []) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+      if (!items || items.length === 0) {
+        addFertilizerRow(containerId, '');
+      } else {
+        items.forEach(val => addFertilizerRow(containerId, val));
+      }
+    }
+
+    function getFertilizerRowsValues(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return [];
+      const inputs = container.querySelectorAll('.fert-input');
+      const values = [];
+      inputs.forEach(input => {
+        const v = input.value.trim();
+        if (v) values.push(v);
+      });
+      return values;
+    }
+
+    function openAddTaskModal() {
+      document.getElementById('taskForm').reset();
+      document.getElementById('editTaskId').value = '';
+      document.getElementById('modalHeadingText').textContent = 'Add Schedule Entry';
+      
+      // Default to today's current date
+      const todayIso = new Date().toISOString().split('T')[0];
+      document.getElementById('inputTaskDate').value = todayIso;
+      updateCalculatedDayPreview();
+
+      document.getElementById('inputDripActive').checked = true;
+      document.getElementById('inputSprayActive').checked = true;
+      document.getElementById('inputDripRuntime').value = '';
+      document.getElementById('inputSprayDose').value = '';
+
+      populateFertilizerRows('dripFertRows', ['']);
+      populateFertilizerRows('sprayFertRows', ['']);
+      toggleDripSprayFields();
+
+      openModal('taskModal');
+    }
+
+    function openEditTaskModal(id) {
+      const task = scheduleData.find(t => t.id === id);
+      if (!task) return;
+
+      document.getElementById('editTaskId').value = task.id;
+      const cal = calculateCalendarDate(cycleStartDate, task.day);
+      document.getElementById('modalHeadingText').textContent = `Edit Schedule Entry · ${cal.formatted}`;
+      document.getElementById('inputTaskDate').value = cal.iso;
+      updateCalculatedDayPreview();
+
+      // Drip
+      const dripItems = getItemsArray(task.drip);
+      const hasDrip = dripItems.length > 0 || !!(task.drip && task.drip.runtime);
+      document.getElementById('inputDripActive').checked = hasDrip;
+      populateFertilizerRows('dripFertRows', dripItems.length > 0 ? dripItems : ['']);
+      document.getElementById('inputDripRuntime').value = task.drip ? (task.drip.runtime || '') : '';
+
+      // Spray
+      const sprayItems = getItemsArray(task.spray);
+      const hasSpray = sprayItems.length > 0 || !!(task.spray && task.spray.dose);
+      document.getElementById('inputSprayActive').checked = hasSpray;
+      populateFertilizerRows('sprayFertRows', sprayItems.length > 0 ? sprayItems : ['']);
+      document.getElementById('inputSprayDose').value = task.spray ? (task.spray.dose || '') : '';
+
+      toggleDripSprayFields();
+      openModal('taskModal');
+    }
+
+    let taskPendingDeleteId = null;
+
+    function openDeleteModal(id) {
+      const task = scheduleData.find(t => t.id === id);
+      if (!task) return;
+
+      taskPendingDeleteId = id;
+      const cal = calculateCalendarDate(cycleStartDate, task.day);
+      const dripList = getItemsArray(task.drip);
+      const sprayList = getItemsArray(task.spray);
+
+      let previewHtml = `<div style="font-weight:700; color:var(--text-main); margin-bottom: 2px;">📅 ${cal.formatted} (${cal.weekday})</div>`;
+      if (dripList.length > 0) {
+        previewHtml += `<div style="color:var(--drip-solid); font-weight:600;">💧 Drip: ${escapeHtml(dripList.join(', '))}</div>`;
+      }
+      if (sprayList.length > 0) {
+        previewHtml += `<div style="color:var(--spray-solid); font-weight:600;">🌿 Spray: ${escapeHtml(sprayList.join(', '))}</div>`;
+      }
+
+      document.getElementById('deleteTaskPreview').innerHTML = previewHtml;
+      openModal('deleteModal');
+    }
+
+    function confirmDeleteTask() {
+      if (taskPendingDeleteId) {
+        scheduleData = scheduleData.filter(t => t.id !== taskPendingDeleteId);
+        taskPendingDeleteId = null;
+        saveToLocalStorage();
+        closeModal('deleteModal');
+        renderApp();
+      }
+    }
+
+    function saveTaskFromModal(e) {
+      e.preventDefault();
+      const id = document.getElementById('editTaskId').value;
+      const selectedDate = document.getElementById('inputTaskDate').value;
+      const day = calculateDayFromDate(selectedDate, cycleStartDate);
+
+      const isDrip = document.getElementById('inputDripActive').checked;
+      const dripItems = getFertilizerRowsValues('dripFertRows');
+      const dripRuntime = document.getElementById('inputDripRuntime').value.trim();
+
+      const isSpray = document.getElementById('inputSprayActive').checked;
+      const sprayItems = getFertilizerRowsValues('sprayFertRows');
+      const sprayDose = document.getElementById('inputSprayDose').value.trim();
+
+      const dripObj = isDrip && (dripItems.length > 0 || dripRuntime) ? {
+        items: dripItems,
+        runtime: dripRuntime
+      } : null;
+
+      const sprayObj = isSpray && (sprayItems.length > 0 || sprayDose) ? {
+        items: sprayItems,
+        dose: sprayDose
+      } : null;
+
+      if (!dripObj && !sprayObj) {
+        alert('Please fill in at least one fertilizer or spray item.');
+        return;
+      }
+
+      if (id) {
+        const existing = scheduleData.find(t => t.id === id);
+        if (existing) {
+          existing.day = day;
+          existing.drip = dripObj;
+          existing.spray = sprayObj;
+        }
+      } else {
+        const newTask = {
+          id: 'pom-custom-' + Date.now(),
+          day: day,
+          done: false,
+          drip: dripObj,
+          spray: sprayObj
+        };
+        scheduleData.push(newTask);
+      }
+
+      saveToLocalStorage();
+      closeModal('taskModal');
+      renderApp();
+    }
+
+    function toggleDripSprayFields() {
+      const dripActive = document.getElementById('inputDripActive').checked;
+      const sprayActive = document.getElementById('inputSprayActive').checked;
+      document.getElementById('dripFieldsContainer').style.opacity = dripActive ? '1' : '0.4';
+      document.getElementById('dripFieldsContainer').style.pointerEvents = dripActive ? 'auto' : 'none';
+      document.getElementById('sprayFieldsContainer').style.opacity = sprayActive ? '1' : '0.4';
+      document.getElementById('sprayFieldsContainer').style.pointerEvents = sprayActive ? 'auto' : 'none';
+    }
+
+    /* --------------------------------------------------------------------------
+       8. MODAL CONTROLS (FULL OVERLAY SCROLLING COMPLIANT)
+       -------------------------------------------------------------------------- */
+    function openModal(id) {
+      const el = document.getElementById(id);
+      el.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      el.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    /* --------------------------------------------------------------------------
+       9. EXPORT & CSV GENERATOR
+       -------------------------------------------------------------------------- */
+    function exportToCSV() {
+      const headers = ["Day", "Calendar Date", "Weekday", "Drip Fertigation", "Drip Runtime", "Foliar Spray", "Spray Dose", "Completed"];
+      const rows = scheduleData.map(item => {
+        const cal = calculateCalendarDate(cycleStartDate, item.day);
+        return [
+          item.day,
+          cal.formatted,
+          cal.weekday,
+          getItemsText(item.drip),
+          item.drip ? (item.drip.runtime || '') : '',
+          getItemsText(item.spray),
+          item.spray ? (item.spray.dose || '') : '',
+          item.done ? 'Yes' : 'No'
+        ].map(cell => `"${String(cell).replace(/"/g, '""')}"`);
+      });
+
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `pomegranate_schedule_${cycleStartDate}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    /* --------------------------------------------------------------------------
+       10. STORAGE PERSISTENCE
+       -------------------------------------------------------------------------- */
+    function saveToLocalStorage() {
+      localStorage.setItem('agriflow_pomegranate_data', JSON.stringify(scheduleData));
+      localStorage.setItem('agriflow_pomegranate_start_date', cycleStartDate);
+    }
+
+    function loadFromLocalStorage() {
+      const savedTheme = localStorage.getItem('agriflow_pomegranate_theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      }
+
+      const savedStartDate = localStorage.getItem('agriflow_pomegranate_start_date');
+      if (savedStartDate) {
+        cycleStartDate = savedStartDate;
+      }
+      const dateInp = document.getElementById('startDateInput');
+      if (dateInp) {
+        dateInp.value = cycleStartDate;
+      }
+
+      const savedData = localStorage.getItem('agriflow_pomegranate_data');
+      if (savedData) {
+        try {
+          scheduleData = JSON.parse(savedData);
+        } catch(e) {
+          scheduleData = JSON.parse(JSON.stringify(POMEGRANATE_SCHEDULE_DEFAULT));
+        }
+      } else {
+        scheduleData = JSON.parse(JSON.stringify(POMEGRANATE_SCHEDULE_DEFAULT));
+      }
+    }
+
+    function clearFilters() {
+      activeFilter = 'all';
+      searchQuery = '';
+      document.getElementById('scheduleSearch').value = '';
+      document.querySelectorAll('.chip-filter').forEach(c => {
+        c.classList.toggle('active', c.getAttribute('data-filter') === 'all');
+      });
+      renderApp();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    /* --------------------------------------------------------------------------
+       11. EVENT LISTENERS
+       -------------------------------------------------------------------------- */
+    document.addEventListener('DOMContentLoaded', () => {
+      loadFromLocalStorage();
+      renderApp();
+
+      document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+
+      document.querySelectorAll('.chip-filter').forEach(chip => {
+        chip.addEventListener('click', () => {
+          document.querySelectorAll('.chip-filter').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          activeFilter = chip.getAttribute('data-filter');
+          renderApp();
+        });
+      });
+
+      document.getElementById('scheduleSearch').addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        renderApp();
+      });
+
+      document.getElementById('viewBtnTable').addEventListener('click', () => {
+        currentViewMode = 'table';
+        document.getElementById('viewBtnTable').classList.add('active');
+        document.getElementById('viewBtnCards').classList.remove('active');
+        document.body.classList.remove('view-card-active');
+        renderApp();
+      });
+
+      document.getElementById('viewBtnCards').addEventListener('click', () => {
+        currentViewMode = 'cards';
+        document.getElementById('viewBtnCards').classList.add('active');
+        document.getElementById('viewBtnTable').classList.remove('active');
+        document.body.classList.add('view-card-active');
+        renderApp();
+      });
+
+      document.getElementById('btnOpenAddModal').addEventListener('click', openAddTaskModal);
+      document.getElementById('btnCloseModal').addEventListener('click', () => closeModal('taskModal'));
+      document.getElementById('btnCancelModal').addEventListener('click', () => closeModal('taskModal'));
+      document.getElementById('taskForm').addEventListener('submit', saveTaskFromModal);
+
+      // Delete confirmation modal listeners
+      document.getElementById('btnCancelDelete').addEventListener('click', () => closeModal('deleteModal'));
+      document.getElementById('btnConfirmDelete').addEventListener('click', confirmDeleteTask);
+
+      document.getElementById('inputTaskDate').addEventListener('input', updateCalculatedDayPreview);
+      document.getElementById('inputTaskDate').addEventListener('change', updateCalculatedDayPreview);
+      document.getElementById('inputDripActive').addEventListener('change', toggleDripSprayFields);
+      document.getElementById('inputSprayActive').addEventListener('change', toggleDripSprayFields);
+
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.addEventListener('click', (e) => {
+          if (e.target === backdrop) {
+            closeModal(backdrop.id);
+          }
+        });
+      });
+
+      document.getElementById('btnOpenShareModal').addEventListener('click', () => {
+        const preview = getNextTaskMessage();
+        document.getElementById('whatsAppPreviewText').textContent = preview;
+        openModal('shareModal');
+      });
+
+      document.getElementById('btnCloseShareModal').addEventListener('click', () => closeModal('shareModal'));
+      
+      document.getElementById('btnCopyWhatsAppText').addEventListener('click', () => {
+        const text = document.getElementById('whatsAppPreviewText').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          const feedback = document.getElementById('copyFeedbackText');
+          feedback.textContent = 'Copied! ✓';
+          setTimeout(() => { feedback.textContent = 'Copy Message'; }, 2000);
+        });
+      });
+
+      document.getElementById('btnDirectSendWhatsApp').addEventListener('click', () => {
+        const msg = getNextTaskMessage();
+        const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        window.open(url, '_blank');
+      });
+
+      document.getElementById('btnExportCSV').addEventListener('click', exportToCSV);
+      document.getElementById('btnPrintSchedule').addEventListener('click', () => {
+        closeModal('shareModal');
+        window.print();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeModal('taskModal');
+          closeModal('shareModal');
+          closeModal('deleteModal');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
