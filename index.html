@@ -786,13 +786,13 @@
 
     .card-item {
       background-color: var(--bg-surface);
-      border-radius: 28px;
-      border: 1px solid transparent;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
       box-shadow: var(--shadow-border);
-      padding: 16px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       transition-property: box-shadow;
       transition-duration: 150ms;
       transition-timing-function: ease-out;
@@ -897,8 +897,7 @@
       box-shadow: var(--shadow-elevation);
       width: 100%;
       max-width: 580px;
-      height: 90vh;
-      max-height: 720px;
+      max-height: min(90vh, 760px);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -1180,14 +1179,66 @@
       }
     }
 
+    /* Utility visibility classes */
+    .hide-desktop {
+      display: none !important;
+    }
+
+    .mobile-table-hint {
+      display: none;
+      padding: 8px 14px;
+      background-color: var(--primary-subtle);
+      border-bottom: 1px solid var(--primary-border);
+      color: var(--primary);
+      font-size: 0.76rem;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+
+    /* Floating Action Button (FAB) for mobile quick task entry */
+    .fab-btn {
+      position: fixed;
+      bottom: 22px;
+      right: 18px;
+      z-index: 90;
+      background-color: var(--primary);
+      color: white;
+      border: 1px solid oklch(1 0 0 / 0.15);
+      border-radius: 999px;
+      padding: 0 18px;
+      height: 48px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      box-shadow: 0 4px 16px -2px oklch(0.48 0.15 145 / 0.35), 0 2px 6px -1px oklch(0 0 0 / 0.18);
+      transition: scale 150ms ease-out, background-color 150ms ease-out, box-shadow 150ms ease-out;
+    }
+    .fab-btn:active {
+      scale: 0.94;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
+      .hide-mobile {
+        display: none !important;
+      }
+      .hide-desktop {
+        display: inline-flex !important;
+      }
+      .fab-btn {
+        display: inline-flex;
+      }
+
       .header-inner {
         padding: 10px 14px;
         gap: 8px;
       }
       .container {
-        padding: 12px 14px;
+        padding: 10px 12px;
       }
       .brand-title span.full-title {
         display: none;
@@ -1195,52 +1246,161 @@
       .badge-pill {
         display: none;
       }
+      .header-actions {
+        gap: 6px;
+      }
       .btn {
         height: 36px;
         font-size: 0.82rem;
-        padding-inline: 12px;
+        padding-inline: 10px;
       }
       .btn.icon-leading {
-        padding-inline-start: 10px;
-        padding-inline-end: 12px;
+        padding-inline-start: 8px;
+        padding-inline-end: 10px;
       }
       .btn-icon {
         width: 36px;
         height: 36px;
       }
-      .config-grid {
-        grid-template-columns: 1fr;
-      }
-      .search-box {
-        width: 100%;
-        order: 3;
-      }
-      .toolbar {
+
+      /* Compact 1-Row Metrics Ribbon (saves 200px+ vertical viewport height) */
+      .stats-row {
+        grid-template-columns: repeat(3, 1fr);
         gap: 8px;
+        margin-top: 10px;
       }
-      .view-card-active .table-container {
-        display: none;
+      .stat-card {
+        padding: 8px 6px;
+        border-radius: 16px;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 4px;
       }
-      .view-card-active .cards-view-container {
-        display: flex;
+      .stat-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+      }
+      .stat-icon svg {
+        width: 15px;
+        height: 15px;
+      }
+      .stat-label {
+        font-size: 0.68rem;
+        line-height: 1.15;
+        white-space: nowrap;
+        font-weight: 600;
+      }
+      .stat-value {
+        font-size: 1.15rem;
+        font-weight: 700;
+        line-height: 1.1;
       }
 
-      /* Mobile Modal: ensure footer buttons are always pinned and visible */
+      /* Toolbar mobile ergonomics */
+      .toolbar {
+        margin-top: 14px;
+        gap: 8px;
+      }
+      .filter-chips {
+        width: 100%;
+        order: 1;
+        padding-bottom: 4px;
+      }
+      .toolbar-right {
+        width: 100%;
+        order: 2;
+        margin-left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .search-box {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+      .search-input {
+        height: 34px;
+        font-size: 0.82rem;
+      }
+      .segmented-control {
+        flex-shrink: 0;
+      }
+      .segment-btn {
+        height: 28px;
+        padding: 0 10px;
+        font-size: 0.78rem;
+      }
+
+      /* Sticky status & date columns for smooth horizontal swiping in Table view */
+      .mobile-table-hint {
+        display: block;
+      }
+      .schedule-table th.col-status,
+      .schedule-table td.col-status {
+        position: sticky;
+        left: 0;
+        z-index: 5;
+        background-color: var(--bg-surface);
+      }
+      .schedule-table thead th.col-status {
+        background-color: var(--bg-surface-subtle);
+        z-index: 12;
+      }
+      .schedule-table th.col-date,
+      .schedule-table td.col-date {
+        position: sticky;
+        left: 48px;
+        z-index: 5;
+        background-color: var(--bg-surface);
+        box-shadow: 2px 0 6px -1px oklch(0 0 0 / 0.1);
+      }
+      .schedule-table thead th.col-date {
+        background-color: var(--bg-surface-subtle);
+        z-index: 12;
+      }
+      .table-row.is-done td.col-status,
+      .table-row.is-done td.col-date {
+        background-color: oklch(0.98 0.005 140 / 0.95);
+      }
+      [data-theme="dark"] .table-row.is-done td.col-status,
+      [data-theme="dark"] .table-row.is-done td.col-date {
+        background-color: oklch(0.16 0.01 140 / 0.95);
+      }
+
+      /* View Switching */
+      .view-card-active .table-container {
+        display: none !important;
+      }
+      .view-card-active .cards-view-container {
+        display: flex !important;
+      }
+
+      /* Mobile Modal: clean sheet presentation with pinned header and footer */
       .modal-backdrop {
-        padding: 8px;
+        padding: 0;
         align-items: flex-end;
       }
       .modal-dialog {
-        height: 92vh;
-        max-height: 92vh;
+        height: 94vh;
+        max-height: 94vh;
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
-        margin-bottom: 0;
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
       }
       .modal-dialog.delete-dialog {
         height: auto;
         border-radius: 20px;
         margin: auto;
+        width: calc(100% - 32px);
+      }
+      .modal-body {
+        padding: 14px 16px;
+        gap: 12px;
       }
       .modal-footer {
         padding: 12px 16px;
@@ -1286,6 +1446,13 @@
             <line x1="12" y1="2" x2="12" y2="15"></line>
           </svg>
           <span class="hide-mobile">Export</span>
+        </button>
+
+        <button id="btnRestoreDefaults" class="btn-icon" type="button" aria-label="Restore master pomegranate schedule" title="Restore master schedule defaults">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
         </button>
 
         <button id="themeToggleBtn" class="btn-icon" type="button" aria-label="Toggle theme mode" title="Toggle dark / light theme">
@@ -1395,6 +1562,9 @@
          VIEW 1: COMBINED TABLE (SHOWS BOTH DRIP AND SPRAY ON THE TABLE)
          ========================================================================== -->
     <div id="tableContainer" class="table-container stagger-item">
+      <div class="mobile-table-hint">
+        <span>👈 Swipe table horizontally to view Foliar Spray &amp; actions 👉</span>
+      </div>
       <div class="table-scroll-wrapper">
         <table class="schedule-table" id="farmingTable" aria-label="Combined Pomegranate Drip and Spray Schedule">
           <thead>
@@ -1434,9 +1604,13 @@
     <div id="emptyScheduleState" class="empty-state" style="display: none;">
       <h3 style="font-size: 1.15rem; font-weight: 700;">No schedule entries found</h3>
       <p style="color: var(--text-muted); max-width: 420px; margin: 6px auto 16px; font-size: 0.9rem;">
-        No tasks match your current filter or search criteria.
+        No tasks match your current filter, or your schedule is currently empty.
       </p>
-      <button class="btn btn-primary" onclick="clearFilters()">Reset Filters</button>
+      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+        <button class="btn btn-secondary" onclick="clearFilters()">Reset Filters</button>
+        <button class="btn btn-primary" onclick="resetToMasterSchedule()">Load Master Schedule</button>
+        <button class="btn btn-secondary" onclick="openAddTaskModal()">+ Add New Task</button>
+      </div>
     </div>
   </main>
 
@@ -1646,6 +1820,15 @@
     </div>
   </div>
 
+  <!-- Floating Action Button for Mobile -->
+  <button id="btnFabAddTask" class="fab-btn hide-desktop" type="button" aria-label="Add new schedule entry">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    <span>Add Task</span>
+  </button>
+
   <!-- ==========================================================================
        JAVASCRIPT: POMEGRANATE ONLY APPLICATION LOGIC
        ========================================================================== -->
@@ -1853,7 +2036,7 @@
     let scheduleData = [];
     let activeFilter = 'all';
     let searchQuery = '';
-    let currentViewMode = 'table';
+    let currentViewMode = (typeof window !== 'undefined' && window.innerWidth < 768) ? 'cards' : 'table';
 
     /* --------------------------------------------------------------------------
        3. THEME SWITCH WITH TRANSITION SUPPRESSION (BETTER-UI SPEC)
@@ -2114,15 +2297,15 @@
                 <div class="date-sub tabular-num">${cal.weekday}</div>
               </div>
             </div>
-            <div style="display: flex; gap: 4px;">
-              <button class="btn-icon" style="width: 32px; height: 32px; border-radius: 8px;" onclick="openEditTaskModal('${item.id}')" aria-label="Edit task">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div style="display: flex; gap: 6px;">
+              <button class="btn-icon" style="width: 36px; height: 36px; border-radius: 9px;" onclick="openEditTaskModal('${item.id}')" aria-label="Edit task">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                 </svg>
               </button>
-              <button class="btn-icon" style="width: 32px; height: 32px; border-radius: 8px; color: oklch(0.5 0.2 25);" onclick="openDeleteModal('${item.id}')" aria-label="Delete task">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <button class="btn-icon" style="width: 36px; height: 36px; border-radius: 9px; color: oklch(0.55 0.22 25);" onclick="openDeleteModal('${item.id}')" aria-label="Delete task">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
@@ -2504,6 +2687,24 @@
       localStorage.setItem('agriflow_pomegranate_start_date', cycleStartDate);
     }
 
+    function updateViewModeUI() {
+      const isCards = currentViewMode === 'cards';
+      const btnTable = document.getElementById('viewBtnTable');
+      const btnCards = document.getElementById('viewBtnCards');
+      if (btnTable && btnCards) {
+        btnTable.classList.toggle('active', !isCards);
+        btnCards.classList.toggle('active', isCards);
+      }
+      document.body.classList.toggle('view-card-active', isCards);
+    }
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      localStorage.setItem('agriflow_pomegranate_view_mode', mode);
+      updateViewModeUI();
+      renderApp();
+    }
+
     function loadFromLocalStorage() {
       const savedTheme = localStorage.getItem('agriflow_pomegranate_theme');
       if (savedTheme) {
@@ -2519,16 +2720,35 @@
         dateInp.value = cycleStartDate;
       }
 
+      const savedView = localStorage.getItem('agriflow_pomegranate_view_mode');
+      if (savedView) {
+        currentViewMode = savedView;
+      } else {
+        currentViewMode = (typeof window !== 'undefined' && window.innerWidth < 768) ? 'cards' : 'table';
+      }
+      updateViewModeUI();
+
       const savedData = localStorage.getItem('agriflow_pomegranate_data');
       if (savedData) {
         try {
           scheduleData = JSON.parse(savedData);
+          if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
+            scheduleData = JSON.parse(JSON.stringify(POMEGRANATE_SCHEDULE_DEFAULT));
+            saveToLocalStorage();
+          }
         } catch(e) {
           scheduleData = JSON.parse(JSON.stringify(POMEGRANATE_SCHEDULE_DEFAULT));
         }
       } else {
         scheduleData = JSON.parse(JSON.stringify(POMEGRANATE_SCHEDULE_DEFAULT));
       }
+    }
+
+    function resetToMasterSchedule() {
+      scheduleData = JSON.parse(JSON.stringify(POMEGRANATE_SCHEDULE_DEFAULT));
+      cycleStartDate = new Date().toISOString().split('T')[0];
+      saveToLocalStorage();
+      clearFilters();
     }
 
     function clearFilters() {
@@ -2560,6 +2780,15 @@
 
       document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
 
+      const btnRestore = document.getElementById('btnRestoreDefaults');
+      if (btnRestore) {
+        btnRestore.addEventListener('click', () => {
+          if (confirm('Restore master pomegranate farming schedule? Any custom edits will be replaced.')) {
+            resetToMasterSchedule();
+          }
+        });
+      }
+
       document.querySelectorAll('.chip-filter').forEach(chip => {
         chip.addEventListener('click', () => {
           document.querySelectorAll('.chip-filter').forEach(c => c.classList.remove('active'));
@@ -2574,21 +2803,13 @@
         renderApp();
       });
 
-      document.getElementById('viewBtnTable').addEventListener('click', () => {
-        currentViewMode = 'table';
-        document.getElementById('viewBtnTable').classList.add('active');
-        document.getElementById('viewBtnCards').classList.remove('active');
-        document.body.classList.remove('view-card-active');
-        renderApp();
-      });
+      document.getElementById('viewBtnTable').addEventListener('click', () => setViewMode('table'));
+      document.getElementById('viewBtnCards').addEventListener('click', () => setViewMode('cards'));
 
-      document.getElementById('viewBtnCards').addEventListener('click', () => {
-        currentViewMode = 'cards';
-        document.getElementById('viewBtnCards').classList.add('active');
-        document.getElementById('viewBtnTable').classList.remove('active');
-        document.body.classList.add('view-card-active');
-        renderApp();
-      });
+      const fabBtn = document.getElementById('btnFabAddTask');
+      if (fabBtn) {
+        fabBtn.addEventListener('click', openAddTaskModal);
+      }
 
       document.getElementById('btnOpenAddModal').addEventListener('click', openAddTaskModal);
       document.getElementById('btnCloseModal').addEventListener('click', () => closeModal('taskModal'));
