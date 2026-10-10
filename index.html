@@ -593,7 +593,7 @@
       border-spacing: 0;
       text-align: left;
       font-size: 0.88rem;
-      min-width: 820px;
+      min-width: 660px;
     }
 
     .schedule-table thead th {
@@ -639,15 +639,12 @@
     }
 
     /* Column Sizing */
-    .col-status {
-      width: 48px;
-      text-align: center;
-      padding-right: 4px !important;
-    }
-
     .col-date {
-      width: 160px;
+      width: 110px;
+      min-width: 95px;
+      max-width: 125px;
       white-space: nowrap;
+      padding: 14px 10px !important;
     }
 
     .col-drip {
@@ -1184,18 +1181,6 @@
       display: none !important;
     }
 
-    .mobile-table-hint {
-      display: none;
-      padding: 8px 14px;
-      background-color: var(--primary-subtle);
-      border-bottom: 1px solid var(--primary-border);
-      color: var(--primary);
-      font-size: 0.76rem;
-      font-weight: 600;
-      text-align: center;
-      letter-spacing: 0.02em;
-    }
-
     /* Floating Action Button (FAB) for mobile quick task entry */
     .fab-btn {
       position: fixed;
@@ -1334,25 +1319,11 @@
         font-size: 0.78rem;
       }
 
-      /* Sticky status & date columns for smooth horizontal swiping in Table view */
-      .mobile-table-hint {
-        display: block;
-      }
-      .schedule-table th.col-status,
-      .schedule-table td.col-status {
-        position: sticky;
-        left: 0;
-        z-index: 5;
-        background-color: var(--bg-surface);
-      }
-      .schedule-table thead th.col-status {
-        background-color: var(--bg-surface-subtle);
-        z-index: 12;
-      }
+      /* Sticky date column for smooth horizontal swiping in Table view */
       .schedule-table th.col-date,
       .schedule-table td.col-date {
         position: sticky;
-        left: 48px;
+        left: 0;
         z-index: 5;
         background-color: var(--bg-surface);
         box-shadow: 2px 0 6px -1px oklch(0 0 0 / 0.1);
@@ -1361,11 +1332,9 @@
         background-color: var(--bg-surface-subtle);
         z-index: 12;
       }
-      .table-row.is-done td.col-status,
       .table-row.is-done td.col-date {
         background-color: oklch(0.98 0.005 140 / 0.95);
       }
-      [data-theme="dark"] .table-row.is-done td.col-status,
       [data-theme="dark"] .table-row.is-done td.col-date {
         background-color: oklch(0.16 0.01 140 / 0.95);
       }
@@ -1562,14 +1531,10 @@
          VIEW 1: COMBINED TABLE (SHOWS BOTH DRIP AND SPRAY ON THE TABLE)
          ========================================================================== -->
     <div id="tableContainer" class="table-container stagger-item">
-      <div class="mobile-table-hint">
-        <span>👈 Swipe table horizontally to view Foliar Spray &amp; actions 👉</span>
-      </div>
       <div class="table-scroll-wrapper">
         <table class="schedule-table" id="farmingTable" aria-label="Combined Pomegranate Drip and Spray Schedule">
           <thead>
             <tr>
-              <th class="col-status" scope="col">Done</th>
               <th class="col-date" scope="col">Date</th>
               <th class="col-drip" scope="col">
                 <span style="display: inline-flex; align-items: center; gap: 6px; color: var(--drip-solid);">
@@ -2170,29 +2135,17 @@
         tr.className = `table-row ${item.done ? 'is-done' : ''} ${isToday ? 'is-today' : ''}`;
         tr.id = `row-${item.id}`;
 
-        // Status Checkbox
-        const tdStatus = document.createElement('td');
-        tdStatus.className = 'col-status';
-        tdStatus.innerHTML = `
-          <label class="checkbox-wrap" title="${item.done ? 'Mark pending' : 'Mark completed'}">
-            <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleTaskDone('${item.id}', this.checked)">
-            <span class="checkbox-custom">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-            </span>
-          </label>
-        `;
-
-        // Date Column (Without Day)
+        // Date Column (Compact, Without Day)
         const tdDate = document.createElement('td');
         tdDate.className = 'col-date';
         tdDate.innerHTML = `
-          <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); display: flex; align-items: center; gap: 6px;" class="tabular-num">
-            ${cal.formatted}
-            ${isToday ? '<span class="badge-pill" style="font-size: 0.65rem; padding: 1px 5px;">Today</span>' : ''}
+          <div style="font-weight: 700; font-size: 0.84rem; color: var(--text-main); line-height: 1.25;" class="tabular-num">
+            <div>${cal.formatted}</div>
+            <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+              <span class="date-sub tabular-num" style="font-size: 0.72rem; margin: 0;">${cal.weekday}</span>
+              ${isToday ? '<span class="badge-pill" style="font-size: 0.58rem; padding: 0 4px; line-height: 1.2;">Today</span>' : ''}
+            </div>
           </div>
-          <div class="date-sub tabular-num">${cal.weekday}</div>
         `;
 
         // Drip Cell (Fertigation)
@@ -2259,7 +2212,6 @@
           </div>
         `;
 
-        tr.appendChild(tdStatus);
         tr.appendChild(tdDate);
         tr.appendChild(tdDrip);
         tr.appendChild(tdSpray);
