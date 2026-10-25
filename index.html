@@ -708,15 +708,6 @@
       color: white;
     }
 
-    .day-badge {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
     .date-sub {
       font-size: 0.78rem;
       color: var(--text-muted);
@@ -1616,7 +1607,7 @@
               Schedule Date
             </label>
             <input type="date" id="inputTaskDate" class="form-control tabular-num" required>
-            <span id="calculatedDayPreview" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;"></span>
+            <span id="datePreview" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;"></span>
           </div>
 
           <!-- Section: Drip Fertigation -->
@@ -1801,10 +1792,10 @@
     /* --------------------------------------------------------------------------
        1. POMEGRANATE DRIP & SPRAY MASTER SCHEDULE
        -------------------------------------------------------------------------- */
-    const POMEGRANATE_SCHEDULE_DEFAULT = [
+    const POMEGRANATE_SCHEDULE_TEMPLATE = [
       {
         id: 'pom-1',
-        day: 1,
+        offset: 1,
         done: true,
         drip: {
           items: ['Hydrogen Peroxide with Silver (1.5 Liters/acre)'],
@@ -1817,7 +1808,7 @@
       },
       {
         id: 'pom-2',
-        day: 10,
+        offset: 10,
         done: true,
         drip: {
           items: ['12:61:00 (MAP) 4.0 kg', 'Humic Acid 98% (500g)'],
@@ -1830,7 +1821,7 @@
       },
       {
         id: 'pom-3',
-        day: 20,
+        offset: 20,
         done: false,
         drip: {
           items: ['19:19:19 (4.0 kg)', 'Zinc Chelate EDTA 12% (500g)'],
@@ -1843,7 +1834,7 @@
       },
       {
         id: 'pom-4',
-        day: 30,
+        offset: 30,
         done: false,
         drip: {
           items: ['12:61:00 (5.0 kg)', 'Magnesium Sulphate (3.0 kg)'],
@@ -1856,7 +1847,7 @@
       },
       {
         id: 'pom-5',
-        day: 42,
+        offset: 42,
         done: false,
         drip: {
           items: ['00:52:34 (MKP) 5.0 kg', 'Solubor (Boron 20%) 250g'],
@@ -1869,7 +1860,7 @@
       },
       {
         id: 'pom-6',
-        day: 55,
+        offset: 55,
         done: false,
         drip: {
           items: ['13:40:13 (4.0 kg)', 'Calcium Nitrate (4.0 kg)'],
@@ -1882,7 +1873,7 @@
       },
       {
         id: 'pom-7',
-        day: 70,
+        offset: 70,
         done: false,
         drip: {
           items: ['13:00:45 (Potassium Nitrate) 5.0 kg', 'Boron (200g)'],
@@ -1895,7 +1886,7 @@
       },
       {
         id: 'pom-8',
-        day: 85,
+        offset: 85,
         done: false,
         drip: {
           items: ['00:52:34 (4.0 kg)', '13:00:45 (4.0 kg)'],
@@ -1908,7 +1899,7 @@
       },
       {
         id: 'pom-9',
-        day: 100,
+        offset: 100,
         done: false,
         drip: {
           items: ['Calcium Nitrate (5.0 kg/acre)'],
@@ -1921,7 +1912,7 @@
       },
       {
         id: 'pom-10',
-        day: 115,
+        offset: 115,
         done: false,
         drip: {
           items: ['13:00:45 (6.0 kg)', 'Magnesium Sulphate (3.0 kg)'],
@@ -1934,7 +1925,7 @@
       },
       {
         id: 'pom-11',
-        day: 130,
+        offset: 130,
         done: false,
         drip: {
           items: ['00:00:50 (Potassium Sulphate - SOP) 6.0 kg'],
@@ -1947,7 +1938,7 @@
       },
       {
         id: 'pom-12',
-        day: 145,
+        offset: 145,
         done: false,
         drip: {
           items: ['00:00:50 (SOP) 7.0 kg/acre'],
@@ -1960,7 +1951,7 @@
       },
       {
         id: 'pom-13',
-        day: 160,
+        offset: 160,
         done: false,
         drip: {
           items: ['00:00:50 (SOP) 5.0 kg/acre'],
@@ -1972,6 +1963,44 @@
         }
       }
     ];
+
+    /* Builds the master schedule with REAL calendar dates.
+       Template offsets (1, 10, 20 ... days) are mapped onto actual dates,
+       with Day-1 anchored to today the moment the schedule is built. */
+    function buildMasterSchedule() {
+      const today = getTodayIso();
+      return POMEGRANATE_SCHEDULE_TEMPLATE.map(entry => ({
+        id: entry.id,
+        date: addDaysIso(today, entry.offset - 1),
+        done: !!entry.done,
+        drip: entry.drip ? JSON.parse(JSON.stringify(entry.drip)) : null,
+        spray: entry.spray ? JSON.parse(JSON.stringify(entry.spray)) : null
+      }));
+    }
+
+    /* One-time migration: older saves stored a numeric "day" offset relative to a
+       cycle start date. Convert those to absolute calendar dates and drop the
+       day field entirely, so the Day-N concept no longer exists in data. */
+    function migrateLegacySchedule(items) {
+      const legacyStart = localStorage.getItem('agriflow_pomegranate_start_date');
+      const baseDate = isValidIsoDate(legacyStart) ? legacyStart : getTodayIso();
+      const migrated = items.map(item => {
+        if (isValidIsoDate(item.date)) {
+          delete item.day;
+          return item;
+        }
+        const offset = Number.isFinite(item.day) && item.day > 0 ? item.day : 1;
+        return {
+          id: item.id || ('pom-migrated-' + Date.now() + '-' + Math.floor(Math.random() * 1000)),
+          date: addDaysIso(baseDate, offset - 1),
+          done: !!item.done,
+          drip: item.drip || null,
+          spray: item.spray || null
+        };
+      });
+      localStorage.removeItem('agriflow_pomegranate_start_date');
+      return migrated;
+    }
 
     /* Helper: get display text from items array (join with ' + ') — handles legacy title string too */
     function getItemsText(obj) {
@@ -1997,7 +2026,6 @@
     /* --------------------------------------------------------------------------
        2. APPLICATION STATE
        -------------------------------------------------------------------------- */
-    let cycleStartDate = new Date().toISOString().split('T')[0];
     let scheduleData = [];
     let activeFilter = 'all';
     let searchQuery = '';
@@ -2025,24 +2053,32 @@
     }
 
     /* --------------------------------------------------------------------------
-       4. DATE CALCULATION
+       4. DATE HELPERS (LOCAL-TIMEZONE SAFE · PLAIN CALENDAR DATES, NO "DAY N")
        -------------------------------------------------------------------------- */
-    function calculateCalendarDate(startStr, dayOffset) {
-      if (!startStr) return { iso: '', formatted: 'Day ' + dayOffset, weekday: '' };
-      const [year, month, day] = startStr.split('-').map(Number);
-      const baseDate = new Date(year, month - 1, day);
-      baseDate.setDate(baseDate.getDate() + (dayOffset - 1));
+    function getTodayIso() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
 
-      const dayOfMonth = baseDate.getDate();
+    function addDaysIso(isoStr, numDays) {
+      const [year, month, day] = isoStr.split('-').map(Number);
+      const dt = new Date(year, month - 1, day + numDays);
+      return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+    }
+
+    function isValidIsoDate(isoStr) {
+      return typeof isoStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(isoStr);
+    }
+
+    function formatDateIso(isoStr) {
+      if (!isValidIsoDate(isoStr)) return { formatted: '—', weekday: '', fullLabel: '—' };
+      const [year, month, day] = isoStr.split('-').map(Number);
+      const dt = new Date(year, month - 1, day);
       const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      
-      const formatted = `${dayOfMonth} ${monthNames[baseDate.getMonth()]} ${baseDate.getFullYear()}`;
-      const weekday = dayNames[baseDate.getDay()];
-      const isoStr = baseDate.toISOString().split('T')[0];
-
+      const formatted = `${day} ${monthNames[month - 1]} ${year}`;
+      const weekday = dayNames[dt.getDay()];
       return {
-        iso: isoStr,
         formatted: formatted,
         weekday: weekday,
         fullLabel: `${formatted} (${weekday})`
@@ -2050,37 +2086,34 @@
     }
 
     function isSameOrToday(isoDateStr) {
-      const todayIso = new Date().toISOString().split('T')[0];
-      return isoDateStr === todayIso;
+      return isValidIsoDate(isoDateStr) && isoDateStr === getTodayIso();
     }
 
     function isUpcomingOrToday(isoDateStr) {
-      const todayIso = new Date().toISOString().split('T')[0];
-      return isoDateStr >= todayIso;
+      return isValidIsoDate(isoDateStr) && isoDateStr >= getTodayIso();
     }
 
     /* --------------------------------------------------------------------------
        5. RENDERING (BOTH DRIP AND SPRAY ON THE TABLE)
        -------------------------------------------------------------------------- */
     function renderApp() {
-      scheduleData.sort((a, b) => a.day - b.day);
+      scheduleData.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 
       const filtered = scheduleData.filter(item => {
-        const cal = calculateCalendarDate(cycleStartDate, item.day);
+        const fmt = formatDateIso(item.date);
         
         if (activeFilter === 'pending' && item.done) return false;
         if (activeFilter === 'completed' && !item.done) return false;
         if (activeFilter === 'today') {
-          if (!isUpcomingOrToday(cal.iso)) return false;
+          if (!isUpcomingOrToday(item.date)) return false;
         }
 
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
-          const matchDay = (`day ${item.day}`).includes(q);
-          const matchDate = cal.formatted.toLowerCase().includes(q) || cal.weekday.toLowerCase().includes(q);
+          const matchDate = fmt.formatted.toLowerCase().includes(q) || fmt.weekday.toLowerCase().includes(q) || (item.date || '').includes(q);
           const matchDrip = item.drip ? (getItemsText(item.drip) + ' ' + (item.drip.runtime || '')).toLowerCase().includes(q) : false;
           const matchSpray = item.spray ? (getItemsText(item.spray) + ' ' + (item.spray.dose || '')).toLowerCase().includes(q) : false;
-          if (!matchDay && !matchDate && !matchDrip && !matchSpray) {
+          if (!matchDate && !matchDrip && !matchSpray) {
             return false;
           }
         }
@@ -2128,8 +2161,8 @@
       tbody.innerHTML = '';
 
       filtered.forEach(item => {
-        const cal = calculateCalendarDate(cycleStartDate, item.day);
-        const isToday = isSameOrToday(cal.iso);
+        const fmt = formatDateIso(item.date);
+        const isToday = isSameOrToday(item.date);
 
         const tr = document.createElement('tr');
         tr.className = `table-row ${item.done ? 'is-done' : ''} ${isToday ? 'is-today' : ''}`;
@@ -2140,9 +2173,9 @@
         tdDate.className = 'col-date';
         tdDate.innerHTML = `
           <div style="font-weight: 700; font-size: 0.84rem; color: var(--text-main); line-height: 1.25;" class="tabular-num">
-            <div>${cal.formatted}</div>
+            <div>${fmt.formatted}</div>
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-              <span class="date-sub tabular-num" style="font-size: 0.72rem; margin: 0;">${cal.weekday}</span>
+              <span class="date-sub tabular-num" style="font-size: 0.72rem; margin: 0;">${fmt.weekday}</span>
               ${isToday ? '<span class="badge-pill" style="font-size: 0.58rem; padding: 0 4px; line-height: 1.2;">Today</span>' : ''}
             </div>
           </div>
@@ -2223,8 +2256,8 @@
       // Render Cards View (Mobile Timeline)
       cardsWrapper.innerHTML = '';
       filtered.forEach(item => {
-        const cal = calculateCalendarDate(cycleStartDate, item.day);
-        const isToday = isSameOrToday(cal.iso);
+        const fmt = formatDateIso(item.date);
+        const isToday = isSameOrToday(item.date);
         const cardDripItems = getItemsArray(item.drip);
         const cardSprayItems = getItemsArray(item.spray);
 
@@ -2243,10 +2276,10 @@
               </label>
               <div>
                 <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center; gap: 6px;" class="tabular-num">
-                  ${cal.formatted}
+                  ${fmt.formatted}
                   ${isToday ? '<span class="badge-pill" style="font-size: 0.65rem;">Today</span>' : ''}
                 </div>
-                <div class="date-sub tabular-num">${cal.weekday}</div>
+                <div class="date-sub tabular-num">${fmt.weekday}</div>
               </div>
             </div>
             <div style="display: flex; gap: 6px;">
@@ -2313,10 +2346,11 @@
        6. WHATSAPP INSTRUCTION GENERATOR
        -------------------------------------------------------------------------- */
     function getNextTaskMessage() {
-      const task = scheduleData.find(item => !item.done) || scheduleData[0];
+      const sorted = scheduleData.slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      const task = sorted.find(item => !item.done) || sorted[0];
       if (!task) return 'No scheduled pomegranate tasks found.';
-      const cal = calculateCalendarDate(cycleStartDate, task.day);
-      let msg = `🌿 *POMEGRANATE FARM TASK - DAY ${task.day} (${cal.formatted.toUpperCase()})*\n`;
+      const fmt = formatDateIso(task.date);
+      let msg = `🌿 *POMEGRANATE FARM TASK - ${fmt.formatted.toUpperCase()} (${fmt.weekday.toUpperCase()})*\n`;
       msg += `------------------------------------\n`;
       
       const dripList = getItemsArray(task.drip);
@@ -2355,28 +2389,19 @@
       }
     }
 
-    function calculateDayFromDate(dateStr, startStr) {
-      if (!dateStr || !startStr) return 1;
-      const [y1, m1, d1] = dateStr.split('-').map(Number);
-      const [y2, m2, d2] = startStr.split('-').map(Number);
-      const date1 = new Date(y1, m1 - 1, d1);
-      const date2 = new Date(y2, m2 - 1, d2);
-      const diffTime = date1.getTime() - date2.getTime();
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays >= 0 ? diffDays + 1 : 1;
-    }
-
-    function updateCalculatedDayPreview() {
+    function updateDatePreview() {
       const dateVal = document.getElementById('inputTaskDate').value;
-      if (dateVal) {
+      const previewEl = document.getElementById('datePreview');
+      if (dateVal && isValidIsoDate(dateVal)) {
         const [year, month, dayNum] = dateVal.split('-').map(Number);
         const dt = new Date(year, month - 1, dayNum);
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         const formatted = `${dayNum} ${monthNames[dt.getMonth()]} ${dt.getFullYear()} (${dayNames[dt.getDay()]})`;
-        document.getElementById('calculatedDayPreview').textContent = `📅 ${formatted}`;
+        const isPastDate = dateVal < getTodayIso();
+        previewEl.textContent = `📅 ${formatted}${isPastDate ? ' · past date allowed' : ''}`;
       } else {
-        document.getElementById('calculatedDayPreview').textContent = '';
+        previewEl.textContent = '';
       }
     }
 
@@ -2448,10 +2473,9 @@
       document.getElementById('editTaskId').value = '';
       document.getElementById('modalHeadingText').textContent = 'Add Schedule Entry';
       
-      // Default to today's current date
-      const todayIso = new Date().toISOString().split('T')[0];
-      document.getElementById('inputTaskDate').value = todayIso;
-      updateCalculatedDayPreview();
+      // Default to today's LOCAL date — past dates are fully allowed
+      document.getElementById('inputTaskDate').value = getTodayIso();
+      updateDatePreview();
 
       document.getElementById('inputDripActive').checked = true;
       document.getElementById('inputSprayActive').checked = true;
@@ -2470,10 +2494,10 @@
       if (!task) return;
 
       document.getElementById('editTaskId').value = task.id;
-      const cal = calculateCalendarDate(cycleStartDate, task.day);
-      document.getElementById('modalHeadingText').textContent = `Edit Schedule Entry · ${cal.formatted}`;
-      document.getElementById('inputTaskDate').value = cal.iso;
-      updateCalculatedDayPreview();
+      const fmt = formatDateIso(task.date);
+      document.getElementById('modalHeadingText').textContent = `Edit Schedule Entry · ${fmt.formatted}`;
+      document.getElementById('inputTaskDate').value = task.date;
+      updateDatePreview();
 
       // Drip
       const dripItems = getItemsArray(task.drip);
@@ -2500,11 +2524,11 @@
       if (!task) return;
 
       taskPendingDeleteId = id;
-      const cal = calculateCalendarDate(cycleStartDate, task.day);
+      const fmt = formatDateIso(task.date);
       const dripList = getItemsArray(task.drip);
       const sprayList = getItemsArray(task.spray);
 
-      let previewHtml = `<div style="font-weight:700; color:var(--text-main); margin-bottom: 2px;">📅 ${cal.formatted} (${cal.weekday})</div>`;
+      let previewHtml = `<div style="font-weight:700; color:var(--text-main); margin-bottom: 2px;">📅 ${fmt.formatted} (${fmt.weekday})</div>`;
       if (dripList.length > 0) {
         previewHtml += `<div style="color:var(--drip-solid); font-weight:600;">💧 Drip: ${escapeHtml(dripList.join(', '))}</div>`;
       }
@@ -2530,7 +2554,12 @@
       e.preventDefault();
       const id = document.getElementById('editTaskId').value;
       const selectedDate = document.getElementById('inputTaskDate').value;
-      const day = calculateDayFromDate(selectedDate, cycleStartDate);
+
+      // Accept ANY calendar date — past, today or future. No clamping, no Day-N math.
+      if (!isValidIsoDate(selectedDate)) {
+        alert('Please choose a valid schedule date.');
+        return;
+      }
 
       const isDrip = document.getElementById('inputDripActive').checked;
       const dripItems = getFertilizerRowsValues('dripFertRows');
@@ -2558,14 +2587,14 @@
       if (id) {
         const existing = scheduleData.find(t => t.id === id);
         if (existing) {
-          existing.day = day;
+          existing.date = selectedDate;
           existing.drip = dripObj;
           existing.spray = sprayObj;
         }
       } else {
         const newTask = {
           id: 'pom-custom-' + Date.now(),
-          day: day,
+          date: selectedDate,
           done: false,
           drip: dripObj,
           spray: sprayObj
@@ -2606,13 +2635,13 @@
        9. EXPORT & CSV GENERATOR
        -------------------------------------------------------------------------- */
     function exportToCSV() {
-      const headers = ["Day", "Calendar Date", "Weekday", "Drip Fertigation", "Drip Runtime", "Foliar Spray", "Spray Dose", "Completed"];
+      scheduleData.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      const headers = ["Date", "Weekday", "Drip Fertigation", "Drip Runtime", "Foliar Spray", "Spray Dose", "Completed"];
       const rows = scheduleData.map(item => {
-        const cal = calculateCalendarDate(cycleStartDate, item.day);
+        const fmt = formatDateIso(item.date);
         return [
-          item.day,
-          cal.formatted,
-          cal.weekday,
+          fmt.formatted,
+          fmt.weekday,
           getItemsText(item.drip),
           item.drip ? (item.drip.runtime || '') : '',
           getItemsText(item.spray),
@@ -2625,7 +2654,7 @@
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `pomegranate_schedule_${cycleStartDate}.csv`);
+      link.setAttribute("download", `pomegranate_schedule_${getTodayIso()}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -2636,7 +2665,6 @@
        -------------------------------------------------------------------------- */
     function saveToLocalStorage() {
       localStorage.setItem('agriflow_pomegranate_data', JSON.stringify(scheduleData));
-      localStorage.setItem('agriflow_pomegranate_start_date', cycleStartDate);
     }
 
     function updateViewModeUI() {
@@ -2663,15 +2691,6 @@
         document.documentElement.setAttribute('data-theme', savedTheme);
       }
 
-      const savedStartDate = localStorage.getItem('agriflow_pomegranate_start_date');
-      if (savedStartDate) {
-        cycleStartDate = savedStartDate;
-      }
-      const dateInp = document.getElementById('startDateInput');
-      if (dateInp) {
-        dateInp.value = cycleStartDate;
-      }
-
       const savedView = localStorage.getItem('agriflow_pomegranate_view_mode');
       if (savedView) {
         currentViewMode = savedView;
@@ -2685,20 +2704,22 @@
         try {
           scheduleData = JSON.parse(savedData);
           if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
-            scheduleData = JSON.parse(JSON.stringify(POMEGRANATE_SCHEDULE_DEFAULT));
+            scheduleData = buildMasterSchedule();
+            saveToLocalStorage();
+          } else {
+            scheduleData = migrateLegacySchedule(scheduleData);
             saveToLocalStorage();
           }
         } catch(e) {
-          scheduleData = JSON.parse(JSON.stringify(POMEGRANATE_SCHEDULE_DEFAULT));
+          scheduleData = buildMasterSchedule();
         }
       } else {
-        scheduleData = JSON.parse(JSON.stringify(POMEGRANATE_SCHEDULE_DEFAULT));
+        scheduleData = buildMasterSchedule();
       }
     }
 
     function resetToMasterSchedule() {
-      scheduleData = JSON.parse(JSON.stringify(POMEGRANATE_SCHEDULE_DEFAULT));
-      cycleStartDate = new Date().toISOString().split('T')[0];
+      scheduleData = buildMasterSchedule();
       saveToLocalStorage();
       clearFilters();
     }
@@ -2772,8 +2793,8 @@
       document.getElementById('btnCancelDelete').addEventListener('click', () => closeModal('deleteModal'));
       document.getElementById('btnConfirmDelete').addEventListener('click', confirmDeleteTask);
 
-      document.getElementById('inputTaskDate').addEventListener('input', updateCalculatedDayPreview);
-      document.getElementById('inputTaskDate').addEventListener('change', updateCalculatedDayPreview);
+      document.getElementById('inputTaskDate').addEventListener('input', updateDatePreview);
+      document.getElementById('inputTaskDate').addEventListener('change', updateDatePreview);
       document.getElementById('inputDripActive').addEventListener('change', toggleDripSprayFields);
       document.getElementById('inputSprayActive').addEventListener('change', toggleDripSprayFields);
 
