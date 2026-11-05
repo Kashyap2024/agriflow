@@ -1565,7 +1565,7 @@
             <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
             <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
           </svg>
-          <span>Plots (<span id="headerPlotsCount">3</span>)</span>
+          <span>Plots (<span id="headerPlotsCount">0</span>)</span>
         </button>
 
         <button id="btnOpenShareModal" class="btn btn-secondary icon-leading" type="button" aria-label="Share or export schedule">
@@ -1575,13 +1575,6 @@
             <line x1="12" y1="2" x2="12" y2="15"></line>
           </svg>
           <span class="hide-mobile">Export</span>
-        </button>
-
-        <button id="btnRestoreDefaults" class="btn-icon hide-mobile" type="button" aria-label="Restore master pomegranate schedule" title="Restore master schedule defaults">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-            <path d="M3 3v5h5"></path>
-          </svg>
         </button>
 
         <button id="themeToggleBtn" class="btn-icon" type="button" aria-label="Toggle theme mode" title="Toggle dark / light theme">
@@ -1769,7 +1762,7 @@
 
     <!-- ==========================================================================
          VIEW 2: MOBILE CARDS TIMELINE
-         ========================================================================== -->
+    <!-- View 2: Mobile Cards Timeline -->
     <div id="cardsContainer" class="cards-view-container" aria-label="Card schedule items">
       <!-- Injected via JS -->
     </div>
@@ -1778,11 +1771,11 @@
     <div id="emptyScheduleState" class="empty-state" style="display: none;">
       <h3 style="font-size: 1.15rem; font-weight: 700;">No schedule entries found</h3>
       <p style="color: var(--text-muted); max-width: 440px; margin: 6px auto 16px; font-size: 0.9rem;">
-        No tasks match your selected plot or filter. Switch to All Plots or schedule a new task.
+        Your schedule is currently empty. Add your first farm task or configure plots.
       </p>
       <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-        <button class="btn btn-secondary" onclick="resetActivePlotFilter()">Show All Plots</button>
-        <button class="btn btn-primary" onclick="openAddTaskModal()">+ Add Task to Plot</button>
+        <button class="btn btn-secondary" onclick="openPlotsModalUI()">+ Manage Plots</button>
+        <button class="btn btn-primary" onclick="openAddTaskModal()">+ Add New Task</button>
       </div>
     </div>
   </main>
@@ -2108,227 +2101,14 @@
        ========================================================================== -->
   <script>
     /* --------------------------------------------------------------------------
-       1. DEFAULT PLOTS & MASTER SCHEDULE
+       1. DATA STRUCTURES (CLEAN SLATE - DUMMY DATA REMOVED)
        -------------------------------------------------------------------------- */
-    const DEFAULT_PLOTS = [
-      {
-        id: 'plot-1',
-        name: 'Plot 1 - North Block',
-        area: '4.0 Acres',
-        trees: '1,400 Bhagwa Trees',
-        notes: 'Drip Line A · High Density'
-      },
-      {
-        id: 'plot-2',
-        name: 'Plot 2 - South Block',
-        area: '2.5 Acres',
-        trees: '900 Bhagwa Trees',
-        notes: 'Drip Line B · Sandy Loam'
-      },
-      {
-        id: 'plot-3',
-        name: 'Plot 3 - Canal Side',
-        area: '1.5 Acres',
-        trees: '550 Super Bhagwa',
-        notes: 'Drip Line C · Young Plantation'
-      }
-    ];
+    const DEFAULT_PLOTS = [];
 
-    const POMEGRANATE_SCHEDULE_TEMPLATE = [
-      {
-        id: 'pom-1',
-        offset: 1,
-        plotId: 'plot-1',
-        done: true,
-        drip: {
-          items: ['Hydrogen Peroxide with Silver (1.5 Liters/acre)'],
-          runtime: '1.5 Hours'
-        },
-        spray: {
-          items: ['Bordeaux Mixture (1%) / Copper Oxychloride 50% WP'],
-          dose: '3.0 g / Liter of water'
-        }
-      },
-      {
-        id: 'pom-2',
-        offset: 10,
-        plotId: 'plot-1',
-        done: true,
-        drip: {
-          items: ['12:61:00 (MAP) 4.0 kg', 'Humic Acid 98% (500g)'],
-          runtime: '2.0 Hours'
-        },
-        spray: {
-          items: ['Chlorantraniliprole 18.5% SC'],
-          dose: '0.4 ml / Liter of water'
-        }
-      },
-      {
-        id: 'pom-3',
-        offset: 20,
-        plotId: 'plot-2',
-        done: false,
-        drip: {
-          items: ['19:19:19 (4.0 kg)', 'Zinc Chelate EDTA 12% (500g)'],
-          runtime: '2.5 Hours'
-        },
-        spray: {
-          items: ['Gibberellic Acid (GA3) 40 ppm', 'Urea'],
-          dose: '1g / 25L + 10g / L'
-        }
-      },
-      {
-        id: 'pom-4',
-        offset: 30,
-        plotId: 'plot-3',
-        done: false,
-        drip: {
-          items: ['12:61:00 (5.0 kg)', 'Magnesium Sulphate (3.0 kg)'],
-          runtime: '2.5 Hours'
-        },
-        spray: {
-          items: ['Flonicamid 50% WG', 'Neem Oil 10,000 ppm'],
-          dose: '0.4 g/L + 2.0 ml/L'
-        }
-      },
-      {
-        id: 'pom-5',
-        offset: 42,
-        plotId: 'plot-1',
-        done: false,
-        drip: {
-          items: ['00:52:34 (MKP) 5.0 kg', 'Solubor (Boron 20%) 250g'],
-          runtime: '2.5 Hours'
-        },
-        spray: {
-          items: ['Amino Acid Complex 50%', 'Nitrobenzene 20%'],
-          dose: '2.0 ml/L + 1.5 ml/L'
-        }
-      },
-      {
-        id: 'pom-6',
-        offset: 55,
-        plotId: 'plot-3',
-        done: false,
-        drip: {
-          items: ['13:40:13 (4.0 kg)', 'Calcium Nitrate (4.0 kg)'],
-          runtime: '2.5 Hours'
-        },
-        spray: {
-          items: ['Azoxystrobin 18.2% + Difenoconazole 11.4% SC'],
-          dose: '1.0 ml / Liter of water'
-        }
-      },
-      {
-        id: 'pom-7',
-        offset: 70,
-        plotId: 'plot-2',
-        done: false,
-        drip: {
-          items: ['13:00:45 (Potassium Nitrate) 5.0 kg', 'Boron (200g)'],
-          runtime: '3.0 Hours'
-        },
-        spray: {
-          items: ['Spinetoram 11.7% SC'],
-          dose: '0.8 ml / Liter of water'
-        }
-      },
-      {
-        id: 'pom-8',
-        offset: 85,
-        plotId: 'plot-2',
-        done: false,
-        drip: {
-          items: ['00:52:34 (4.0 kg)', '13:00:45 (4.0 kg)'],
-          runtime: '3.0 Hours'
-        },
-        spray: {
-          items: ['Calcium Chelate', 'Foliar Boron 20%'],
-          dose: '1.5 g / Liter of water'
-        }
-      },
-      {
-        id: 'pom-9',
-        offset: 100,
-        plotId: 'plot-3',
-        done: false,
-        drip: {
-          items: ['Calcium Nitrate (5.0 kg/acre)'],
-          runtime: '2.5 Hours'
-        },
-        spray: {
-          items: ['Streptomycin Sulphate 90%', 'Copper Oxychloride'],
-          dose: '0.5 g/L + 2.5 g/L'
-        }
-      },
-      {
-        id: 'pom-10',
-        offset: 115,
-        plotId: 'plot-1',
-        done: false,
-        drip: {
-          items: ['13:00:45 (6.0 kg)', 'Magnesium Sulphate (3.0 kg)'],
-          runtime: '3.0 Hours'
-        },
-        spray: {
-          items: ['Flonicamid 50% WG'],
-          dose: '0.4 g / Liter of water'
-        }
-      },
-      {
-        id: 'pom-11',
-        offset: 130,
-        plotId: 'plot-3',
-        done: false,
-        drip: {
-          items: ['00:00:50 (Potassium Sulphate - SOP) 6.0 kg'],
-          runtime: '3.0 Hours'
-        },
-        spray: {
-          items: ['Potassium Phosphite (Foliar)'],
-          dose: '2.5 ml / Liter of water'
-        }
-      },
-      {
-        id: 'pom-12',
-        offset: 145,
-        plotId: 'plot-2',
-        done: false,
-        drip: {
-          items: ['00:00:50 (SOP) 7.0 kg/acre'],
-          runtime: '3.0 Hours'
-        },
-        spray: {
-          items: ['Chelated Micronutrient Grade II'],
-          dose: '2.0 g / Liter of water'
-        }
-      },
-      {
-        id: 'pom-13',
-        offset: 160,
-        plotId: 'plot-1',
-        done: false,
-        drip: {
-          items: ['00:00:50 (SOP) 5.0 kg/acre'],
-          runtime: '2.5 Hours'
-        },
-        spray: {
-          items: ['Potassium Silicate (Foliar Silica Shield)'],
-          dose: '2.5 ml / Liter of water'
-        }
-      }
-    ];
+    const POMEGRANATE_SCHEDULE_TEMPLATE = [];
 
     function buildMasterSchedule() {
-      const today = getTodayIso();
-      return POMEGRANATE_SCHEDULE_TEMPLATE.map(entry => ({
-        id: entry.id,
-        plotId: entry.plotId || 'all',
-        date: addDaysIso(today, entry.offset - 1),
-        done: !!entry.done,
-        drip: entry.drip ? JSON.parse(JSON.stringify(entry.drip)) : null,
-        spray: entry.spray ? JSON.parse(JSON.stringify(entry.spray)) : null
-      }));
+      return [];
     }
 
     /* --------------------------------------------------------------------------
@@ -2415,9 +2195,13 @@
     function updateActivePlotSummary() {
       const summaryEl = document.getElementById('activePlotSummary');
       if (summaryEl) {
+        if (plotsData.length === 0) {
+          summaryEl.innerHTML = `No plots added yet · Click <strong>New Plot</strong> to create one`;
+          return;
+        }
         if (activePlotFilter === 'all') {
           const totalAcres = plotsData.reduce((acc, p) => acc + (parseFloat(p.area) || 0), 0);
-          summaryEl.innerHTML = `Showing entire farm · <strong>${plotsData.length} Plots</strong> ${totalAcres > 0 ? `(~${totalAcres.toFixed(1)} Ac)` : ''}`;
+          summaryEl.innerHTML = `Showing entire farm · <strong>${plotsData.length} Plot${plotsData.length > 1 ? 's' : ''}</strong> ${totalAcres > 0 ? `(~${totalAcres.toFixed(1)} Ac)` : ''}`;
         } else {
           const curr = getPlotById(activePlotFilter);
           const tasksCount = getPlotTasksCount(activePlotFilter);
@@ -3310,6 +3094,12 @@
       showToast('Viewing All Plots');
     }
 
+    function openPlotsModalUI() {
+      cancelEditPlot();
+      renderPlotsManagerList();
+      openModal('plotModal');
+    }
+
     /* --------------------------------------------------------------------------
        10. STORAGE & STATE PERSISTENCE
        -------------------------------------------------------------------------- */
@@ -3322,6 +3112,13 @@
     }
 
     function loadFromLocalStorage() {
+      // Automatic one-time purge of sample/dummy data from previous runs
+      if (localStorage.getItem('agriflow_dummy_data_purged_v1') !== 'true') {
+        localStorage.removeItem('agriflow_pomegranate_data');
+        localStorage.removeItem('agriflow_pomegranate_plots');
+        localStorage.setItem('agriflow_dummy_data_purged_v1', 'true');
+      }
+
       // Theme
       const savedTheme = localStorage.getItem('agriflow_pomegranate_theme');
       if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
@@ -3336,15 +3133,12 @@
       if (savedPlots) {
         try {
           plotsData = JSON.parse(savedPlots);
-          if (!Array.isArray(plotsData) || plotsData.length === 0) {
-            plotsData = JSON.parse(JSON.stringify(DEFAULT_PLOTS));
-            savePlotsToLocalStorage();
-          }
+          if (!Array.isArray(plotsData)) plotsData = [];
         } catch (e) {
-          plotsData = JSON.parse(JSON.stringify(DEFAULT_PLOTS));
+          plotsData = [];
         }
       } else {
-        plotsData = JSON.parse(JSON.stringify(DEFAULT_PLOTS));
+        plotsData = [];
         savePlotsToLocalStorage();
       }
 
@@ -3361,31 +3155,12 @@
       if (savedSchedule) {
         try {
           scheduleData = JSON.parse(savedSchedule);
-          if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
-            scheduleData = buildMasterSchedule();
-            saveScheduleToLocalStorage();
-          } else {
-            // Migrate legacy data where all tasks were lumped under 'all'
-            const allLumpedToAll = scheduleData.every(item => !item.plotId || item.plotId === 'all');
-            if (allLumpedToAll) {
-              const templateMap = {};
-              POMEGRANATE_SCHEDULE_TEMPLATE.forEach(t => { templateMap[t.id] = t.plotId; });
-              const plotKeys = ['plot-1', 'plot-2', 'plot-3'];
-              scheduleData.forEach((item, idx) => {
-                item.plotId = templateMap[item.id] || plotKeys[idx % plotKeys.length];
-              });
-              saveScheduleToLocalStorage();
-            } else {
-              scheduleData.forEach(item => {
-                if (!item.plotId) item.plotId = 'all';
-              });
-            }
-          }
+          if (!Array.isArray(scheduleData)) scheduleData = [];
         } catch (e) {
-          scheduleData = buildMasterSchedule();
+          scheduleData = [];
         }
       } else {
-        scheduleData = buildMasterSchedule();
+        scheduleData = [];
         saveScheduleToLocalStorage();
       }
 
@@ -3481,21 +3256,23 @@
       document.getElementById('plotForm').addEventListener('submit', savePlotFromForm);
       document.getElementById('btnCancelEditPlot').addEventListener('click', cancelEditPlot);
 
-      // Restore defaults with custom modal
-      document.getElementById('btnRestoreDefaults').addEventListener('click', () => {
-        openConfirmModal({
-          title: 'Reset Master Schedule?',
-          message: 'This will restore the standard Pomegranate Drip & Spray schedule template across your plots. Any custom dates or dosage edits will be replaced.',
-          confirmButtonText: 'Restore Defaults',
-          isDanger: true,
-          onConfirm: () => {
-            scheduleData = buildMasterSchedule();
-            saveScheduleToLocalStorage();
-            renderApp();
-            showToast('Pomegranate schedule reset to master defaults.');
-          }
+      const btnRestore = document.getElementById('btnRestoreDefaults');
+      if (btnRestore) {
+        btnRestore.addEventListener('click', () => {
+          openConfirmModal({
+            title: 'Clear Schedule?',
+            message: 'Are you sure you want to clear all tasks from the schedule?',
+            confirmButtonText: 'Clear All',
+            isDanger: true,
+            onConfirm: () => {
+              scheduleData = [];
+              saveScheduleToLocalStorage();
+              renderApp();
+              showToast('Schedule cleared.');
+            }
+          });
         });
-      });
+      }
 
       // Filter chips
       document.querySelectorAll('.chip-filter').forEach(chip => {
