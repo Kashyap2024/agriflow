@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>AgriFlow · Pomegranate Drip &amp; Spray Schedule</title>
-  <meta name="description" content="Mobile-friendly Pomegranate farming schedule with combined drip fertigation, foliar spray, and multi-plot orchard management.">
+  <meta name="description" content="Mobile-friendly Pomegranate farming schedule with combined table showing both drip fertigation and foliar spray with calendar dates.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   
   <style>
     /* ==========================================================================
-       1. TOKENS & DESIGN SYSTEM SPECIFICATION (BETTER-UI + OKLCH)
+       1. TOKENS & BETTER-UI SPECIFICATION
        ========================================================================== */
     :root {
       /* Colors: Light Mode */
@@ -43,13 +43,7 @@
       --spray-text: oklch(0.34 0.13 148);
       --spray-solid: oklch(0.48 0.15 148);
 
-      /* Plot & Orchard Tokens (Warm Amber / Terracotta) */
-      --plot-bg: oklch(0.96 0.05 65);
-      --plot-border: oklch(0.86 0.09 65);
-      --plot-text: oklch(0.38 0.14 65);
-      --plot-solid: oklch(0.54 0.16 65);
-
-      /* Borders & Shadows */
+      /* Borders & Shadows (Exact better-ui 3-layer light shadow) */
       --border-color: oklch(0.88 0.01 135);
       --border-subtle: oklch(0.92 0.005 135);
       --shadow-border:
@@ -94,14 +88,10 @@
       --spray-text: oklch(0.85 0.1 148);
       --spray-solid: oklch(0.62 0.16 148);
 
-      --plot-bg: oklch(0.24 0.06 65);
-      --plot-border: oklch(0.4 0.1 65);
-      --plot-text: oklch(0.88 0.1 65);
-      --plot-solid: oklch(0.68 0.16 65);
-
       --border-color: oklch(0.28 0.015 140);
       --border-subtle: oklch(0.23 0.01 140);
       
+      /* Exact better-ui dark shadow tokens: 1px white ring */
       --shadow-border: 0 0 0 1px oklch(1 0 0 / 0.08);
       --shadow-border-hover: 0 0 0 1px oklch(1 0 0 / 0.13);
       --shadow-elevation:
@@ -118,12 +108,6 @@
       padding: 0;
     }
 
-    html {
-      max-width: 100%;
-      overflow-x: hidden;
-      -webkit-text-size-adjust: 100%;
-    }
-
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: var(--bg-page);
@@ -133,10 +117,7 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       -webkit-tap-highlight-color: transparent;
-      padding-bottom: 96px;
-      max-width: 100%;
-      overflow-x: hidden;
-      position: relative;
+      padding-bottom: 80px;
     }
 
     button, input, select, textarea {
@@ -150,9 +131,12 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* Micro-interactions & animations */
-    .btn, button.btn-action, .chip-filter, .segment-btn {
-      transition-property: transform, scale, background-color, border-color, color, box-shadow;
+    /* ==========================================================================
+       2. BETTER-UI MOTION & INTERACTION SPECIFICATION
+       ========================================================================== */
+    /* Press scales to 0.96 over 150ms ease-out. Disabled never scales. */
+    .btn, button.btn-action, .chip-filter {
+      transition-property: scale, background-color, border-color, color, box-shadow;
       transition-duration: 150ms;
       transition-timing-function: ease-out;
     }
@@ -160,15 +144,17 @@
     .btn:not(:disabled):active,
     button.btn-action:not(:disabled):active,
     .chip-filter:not(:disabled):active {
-      transform: scale(0.96);
+      scale: 0.96;
     }
 
+    /* High-frequency interactions: table rows get 100ms background transition */
     .table-row {
       transition-property: background-color;
       transition-duration: 100ms;
       transition-timing-function: ease-out;
     }
 
+    /* Hover effects only on hover-capable pointers */
     @media (hover: hover) {
       .table-row:hover {
         background-color: var(--bg-surface-hover);
@@ -191,27 +177,40 @@
       }
     }
 
+    /* Staged entrance with 100ms intervals */
     .stagger-item {
-      animation: fade-in-up 260ms ease-out both;
+      animation: fade-in 300ms ease-out both;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .stagger-item {
+        animation-name: fade-in-up;
+      }
     }
     .stagger-item:nth-child(1) { animation-delay: 0ms; }
-    .stagger-item:nth-child(2) { animation-delay: 60ms; }
-    .stagger-item:nth-child(3) { animation-delay: 120ms; }
-    .stagger-item:nth-child(4) { animation-delay: 180ms; }
+    .stagger-item:nth-child(2) { animation-delay: 100ms; }
+    .stagger-item:nth-child(3) { animation-delay: 200ms; }
+    .stagger-item:nth-child(4) { animation-delay: 300ms; }
 
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
     @keyframes fade-in-up {
       from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(12px);
+        filter: blur(4px);
       }
       to {
         opacity: 1;
         transform: translateY(0);
+        filter: blur(0px);
       }
     }
 
     /* ==========================================================================
-       2. LAYOUT & HEADER
+       3. CONCENTRIC SURFACES & COMPONENT STYLING
+       outerRadius = innerRadius + padding + borderWidth
        ========================================================================== */
     .container {
       max-width: 1320px;
@@ -219,9 +218,10 @@
       padding: 16px 20px;
     }
 
+    /* Header Shell */
     .app-header {
       background-color: var(--bg-surface);
-      border-bottom: 1px solid var(--border-color);
+      border: 1px solid transparent;
       box-shadow: var(--shadow-border);
       position: sticky;
       top: 0;
@@ -248,12 +248,12 @@
       width: 38px;
       height: 38px;
       border-radius: 12px;
-      background: linear-gradient(135deg, var(--plot-solid), var(--primary));
+      background: linear-gradient(135deg, var(--drip-solid), var(--primary));
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      box-shadow: 0 2px 6px oklch(0.48 0.15 145 / 0.25);
+      box-shadow: 0 2px 6px oklch(0.48 0.15 145 / 0.3);
       flex-shrink: 0;
     }
 
@@ -278,19 +278,13 @@
       letter-spacing: 0.05em;
     }
 
-    .badge-pill.plot-indicator {
-      background-color: var(--plot-bg);
-      color: var(--plot-text);
-      border-color: var(--plot-border);
-    }
-
     .header-actions {
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    /* Buttons */
+    /* Buttons with Optical Alignment (2px less padding on icon side) */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -310,7 +304,7 @@
     }
 
     .btn.icon-leading {
-      padding-inline-start: 13px;
+      padding-inline-start: 14px;
       padding-inline-end: 16px;
     }
 
@@ -325,12 +319,6 @@
       color: var(--text-main);
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-border);
-    }
-
-    .btn-plot {
-      background-color: var(--plot-bg);
-      color: var(--plot-text);
-      border: 1px solid var(--plot-border);
     }
 
     .btn-icon {
@@ -353,7 +341,23 @@
       box-shadow: var(--focus-ring);
     }
 
-    /* Form Controls */
+    /* Configuration Panel: Concentric Radius (inner=10px, padding=16px -> outer=26px) */
+    .panel-card {
+      background-color: var(--bg-surface);
+      border-radius: 26px;
+      border: 1px solid transparent;
+      box-shadow: var(--shadow-border);
+      padding: 16px 20px;
+      margin-top: 16px;
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: end;
+    }
+
     .form-group {
       display: flex;
       flex-direction: column;
@@ -391,170 +395,18 @@
       border-color: var(--primary);
     }
 
-    /* ==========================================================================
-       3. PLOT SELECTOR BAR & ACTIVE PLOT BANNER
-       ========================================================================== */
-    .plot-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background-color: var(--bg-surface);
-      border-radius: 18px;
-      padding: 10px 16px;
-      box-shadow: var(--shadow-border);
-      border: 1px solid var(--border-color);
-      margin-top: 14px;
-      flex-wrap: wrap;
-    }
-
-    .plot-select-wrapper {
-      position: relative;
-      flex: 0 0 280px;
-      max-width: 320px;
-      min-width: 0;
-      height: 38px;
-    }
-
-    .plot-select {
-      height: 38px;
-      width: 100%;
-      padding-left: 34px;
-      font-weight: 600;
-      font-size: 0.88rem;
-      cursor: pointer;
-      background-color: var(--bg-surface-subtle);
-      border-color: var(--plot-border);
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
-    }
-
-    .plot-icon-prefix {
-      position: absolute;
-      left: 11px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--plot-solid);
-      pointer-events: none;
-      z-index: 2;
-    }
-
-    .plot-bar-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .include-farmwide-wrap {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 0.76rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      user-select: none;
-      white-space: nowrap;
-      padding: 5px 10px;
-      border-radius: 8px;
-      background-color: var(--bg-surface-subtle);
-      border: 1px solid var(--border-color);
-      height: 32px;
-    }
-    .include-farmwide-wrap input[type="checkbox"] {
-      cursor: pointer;
-      accent-color: var(--primary);
-    }
-
-    .active-plot-badge-summary {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      margin-left: auto;
-    }
-
-    .active-plot-badge-summary strong {
-      color: var(--text-main);
-    }
-
-    /* Plot Tags on Cards */
-    .plot-tag {
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 6px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      max-width: 170px;
-      overflow: hidden;
-      border: 1px solid var(--border-color);
-      background-color: var(--bg-surface-subtle);
-      color: var(--text-muted);
-    }
-
-    .plot-tag.specific-plot {
-      background-color: var(--plot-bg);
-      color: var(--plot-text);
-      border-color: var(--plot-border);
-    }
-
-    .plot-tag.all-plot {
-      background-color: var(--primary-subtle);
-      color: var(--primary);
-      border-color: var(--primary-border);
-    }
-
-    /* Smaller, compact plot number badge for table rows */
-    .table-plot-badge {
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 1px 6px;
-      border-radius: 5px;
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      line-height: 1.25;
-      letter-spacing: 0.02em;
-      border: 1px solid var(--border-color);
-      white-space: nowrap;
-      max-width: 110px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .table-plot-badge.specific {
-      background-color: var(--plot-bg);
-      color: var(--plot-text);
-      border-color: var(--plot-border);
-    }
-
-    .table-plot-badge.all {
-      background-color: var(--primary-subtle);
-      color: var(--primary);
-      border-color: var(--primary-border);
-    }
-
-    /* Stats Overview Bar */
+    /* Stats Overview Bar: Concentric Radius (icon=10px, padding=14px -> outer=24px) */
     .stats-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px;
-      margin-top: 14px;
+      margin-top: 16px;
     }
 
     .stat-card {
       background-color: var(--bg-surface);
-      border-radius: 20px;
-      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      border: 1px solid transparent;
       box-shadow: var(--shadow-border);
       padding: 14px 16px;
       display: flex;
@@ -590,10 +442,10 @@
       border: 1px solid var(--primary-border);
     }
 
-    .stat-icon.plot {
-      background-color: var(--plot-bg);
-      color: var(--plot-solid);
-      border: 1px solid var(--plot-border);
+    .stat-icon.plan {
+      background-color: oklch(0.96 0.04 85);
+      color: oklch(0.48 0.15 75);
+      border: 1px solid oklch(0.88 0.08 85);
     }
 
     .stat-label {
@@ -609,13 +461,13 @@
       line-height: 1.2;
     }
 
-    /* Toolbar (Filters, Search, View Modes) */
+    /* Control Toolbar (Search, Filter, View Modes) */
     .toolbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-top: 16px;
+      margin-top: 20px;
       flex-wrap: wrap;
     }
 
@@ -705,6 +557,9 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      transition-property: background-color, color, box-shadow;
+      transition-duration: 120ms;
+      transition-timing-function: ease-out;
     }
 
     .segment-btn.active {
@@ -714,12 +569,12 @@
     }
 
     /* ==========================================================================
-       4. COMBINED TABLE VIEW
+       4. COMBINED TABLE (BOTH DRIP AND SPRAY ON THE TABLE)
        ========================================================================== */
     .table-container {
       background-color: var(--bg-surface);
-      border-radius: 22px;
-      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      border: 1px solid transparent;
       box-shadow: var(--shadow-border);
       margin-top: 16px;
       overflow: hidden;
@@ -738,7 +593,7 @@
       border-spacing: 0;
       text-align: left;
       font-size: 0.88rem;
-      min-width: 720px;
+      min-width: 660px;
     }
 
     .schedule-table thead th {
@@ -756,14 +611,18 @@
       z-index: 10;
     }
 
-    .schedule-table tbody td {
-      padding: 14px 16px;
-      vertical-align: middle;
+    .schedule-table tbody tr {
       border-bottom: 1px solid var(--border-subtle);
     }
 
-    .schedule-table tbody tr:last-child td {
+    .schedule-table tbody tr:last-child {
       border-bottom: none;
+    }
+
+    .schedule-table tbody td {
+      padding: 16px;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .table-row.is-done {
@@ -779,29 +638,33 @@
       border-left: 3px solid var(--primary);
     }
 
+    /* Column Sizing */
     .col-date {
-      width: 140px;
-      min-width: 130px;
+      width: 110px;
+      min-width: 95px;
+      max-width: 125px;
+      white-space: nowrap;
+      padding: 14px 10px !important;
     }
 
     .col-drip {
-      width: 39%;
+      width: 42%;
       background-color: oklch(0.6 0.15 235 / 0.02);
       border-left: 1px solid var(--border-subtle);
       border-right: 1px solid var(--border-subtle);
     }
 
     .col-spray {
-      width: 39%;
+      width: 42%;
       background-color: oklch(0.5 0.15 148 / 0.02);
     }
 
     .col-actions {
-      width: 80px;
+      width: 72px;
       text-align: right;
     }
 
-    /* Checkbox */
+    /* Custom Checkbox */
     .checkbox-wrap {
       display: inline-flex;
       align-items: center;
@@ -819,7 +682,9 @@
       align-items: center;
       justify-content: center;
       color: transparent;
-      transition: all 150ms ease-out;
+      transition-property: background-color, border-color, color, scale;
+      transition-duration: 150ms;
+      transition-timing-function: ease-out;
     }
 
     .checkbox-custom:hover {
@@ -849,6 +714,7 @@
       margin-top: 2px;
     }
 
+    /* Activity Cells */
     .activity-cell {
       display: flex;
       flex-direction: column;
@@ -896,33 +762,8 @@
       font-style: italic;
     }
 
-    /* Multi-item render */
-    .fert-items-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .fert-items-list li {
-      font-size: 0.84rem;
-      line-height: 1.35;
-      padding-left: 14px;
-      position: relative;
-    }
-
-    .fert-items-list li::before {
-      content: '•';
-      position: absolute;
-      left: 2px;
-      color: var(--text-subtle);
-      font-weight: 700;
-    }
-
     /* ==========================================================================
-       5. MOBILE CARDS TIMELINE VIEW
+       5. MOBILE CARDS TIMELINE
        ========================================================================== */
     .cards-view-container {
       display: none;
@@ -940,6 +781,9 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      transition-property: box-shadow;
+      transition-duration: 150ms;
+      transition-timing-function: ease-out;
     }
 
     .card-item.is-done {
@@ -999,59 +843,16 @@
       font-weight: 700;
     }
 
-    .activity-header.drip { color: var(--drip-solid); }
-    .activity-header.spray { color: var(--spray-solid); }
-    .activity-header.plot { color: var(--plot-solid); }
-
-    /* ==========================================================================
-       6. PLOT MANAGEMENT CARDS & LIST
-       ========================================================================== */
-    .plot-list-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
+    .activity-header.drip {
+      color: var(--drip-solid);
     }
 
-    .plot-item-card {
-      background-color: var(--bg-surface-subtle);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .plot-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .plot-name-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .plot-name {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--text-main);
-    }
-
-    .plot-meta-sub {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+    .activity-header.spray {
+      color: var(--spray-solid);
     }
 
     /* ==========================================================================
-       7. MODALS (TASK, PLOT MANAGER, EXPORT, CONFIRM)
+       6. MODAL & SCROLLABLE POPUP (FIXED FULL SCROLLABILITY)
        ========================================================================== */
     .modal-backdrop {
       position: fixed;
@@ -1067,7 +868,9 @@
       -webkit-overflow-scrolling: touch;
       opacity: 0;
       visibility: hidden;
-      transition: opacity 200ms ease-out, visibility 200ms ease-out;
+      transition-property: opacity, visibility;
+      transition-duration: 200ms;
+      transition-timing-function: ease-out;
     }
 
     .modal-backdrop.open {
@@ -1078,7 +881,7 @@
     .modal-dialog {
       background-color: var(--bg-surface);
       border-radius: 24px;
-      border: 1px solid var(--border-color);
+      border: 1px solid transparent;
       box-shadow: var(--shadow-elevation);
       width: 100%;
       max-width: 580px;
@@ -1089,7 +892,9 @@
       overscroll-behavior: contain;
       margin: auto;
       transform: translateY(14px) scale(0.98);
-      transition: transform 200ms ease-out;
+      transition-property: transform, opacity;
+      transition-duration: 200ms;
+      transition-timing-function: ease-out;
     }
 
     .modal-backdrop.open .modal-dialog {
@@ -1113,16 +918,27 @@
       gap: 8px;
     }
 
+    /* Modal Form & Scrollable Body: flex container with pinned footer */
+    #taskForm {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      flex: 1 1 auto;
+      overflow: hidden;
+    }
+
     .modal-body {
       padding: 18px 20px;
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
       display: flex;
       flex-direction: column;
       gap: 14px;
       flex: 1 1 auto;
-      min-height: 0;
+      min-height: 0; /* Crucial for flex child scrollability */
     }
 
     .modal-footer {
@@ -1134,6 +950,8 @@
       border-top: 1px solid var(--border-color);
       background-color: var(--bg-surface-subtle);
       flex-shrink: 0;
+      position: relative;
+      z-index: 5;
     }
 
     .modal-subcard {
@@ -1154,11 +972,6 @@
     .modal-subcard.spray-card {
       background-color: oklch(0.5 0.15 148 / 0.04);
       border-color: var(--spray-border);
-    }
-
-    .modal-subcard.plot-card {
-      background-color: oklch(0.54 0.16 65 / 0.04);
-      border-color: var(--plot-border);
     }
 
     /* Dynamic Multi-Row Fertilizer Inputs */
@@ -1192,6 +1005,7 @@
       justify-content: center;
       cursor: pointer;
       padding: 0;
+      transition: background-color 120ms ease-out;
     }
 
     .fert-row-remove:hover {
@@ -1211,25 +1025,51 @@
       padding: 6px 12px;
       cursor: pointer;
       margin-top: 2px;
+      transition: background-color 120ms ease-out;
     }
 
     .fert-add-btn:hover {
       background-color: var(--primary-subtle);
     }
 
-    /* Confirmation Modal */
-    .confirm-dialog {
+    /* Render multi-items as list in table/cards */
+    .fert-items-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .fert-items-list li {
+      font-size: 0.84rem;
+      line-height: 1.35;
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .fert-items-list li::before {
+      content: '•';
+      position: absolute;
+      left: 2px;
+      color: var(--text-subtle);
+      font-weight: 700;
+    }
+
+    /* Delete Confirmation Modal Styles */
+    .delete-dialog {
       max-width: 420px !important;
       text-align: center;
     }
 
-    .confirm-dialog .modal-body {
+    .delete-dialog .modal-body {
       padding: 24px 24px 16px;
       align-items: center;
       gap: 12px;
     }
 
-    .confirm-icon-wrap {
+    .delete-icon-wrap {
       width: 52px;
       height: 52px;
       border-radius: 50%;
@@ -1239,12 +1079,46 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-bottom: 4px;
     }
 
-    [data-theme="dark"] .confirm-icon-wrap {
+    [data-theme="dark"] .delete-icon-wrap {
       background-color: oklch(0.25 0.08 25);
       border-color: oklch(0.4 0.12 25);
       color: oklch(0.7 0.18 25);
+    }
+
+    .delete-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .delete-message {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .delete-preview-card {
+      width: 100%;
+      background-color: var(--bg-surface-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 0.84rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .delete-dialog .modal-footer {
+      justify-content: center;
+      gap: 12px;
+      padding: 16px 24px;
     }
 
     .btn-danger {
@@ -1258,45 +1132,47 @@
       background-color: oklch(0.48 0.23 25);
     }
 
-    /* In-App Toast Notification (Zero native alerts) */
-    .toast-container {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      z-index: 200;
-      background-color: var(--text-main);
-      color: var(--bg-surface);
-      padding: 10px 20px;
-      border-radius: 999px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      box-shadow: 0 6px 20px -2px oklch(0 0 0 / 0.35);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 220ms ease-out;
-    }
-
-    .toast-container.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-      pointer-events: auto;
-    }
-
     .empty-state {
       text-align: center;
-      padding: 44px 24px;
+      padding: 48px 24px;
       background-color: var(--bg-surface);
       border-radius: 20px;
       box-shadow: var(--shadow-border);
-      border: 1px solid var(--border-color);
+      border: 1px solid transparent;
       margin-top: 16px;
     }
 
-    /* Floating Action Button for Mobile */
+    /* Print Styles */
+    @media print {
+      body {
+        background-color: white !important;
+        color: black !important;
+        padding-bottom: 0;
+      }
+      .app-header, .toolbar, .config-grid, .btn, .col-actions, .modal-backdrop {
+        display: none !important;
+      }
+      .table-container {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        overflow: visible !important;
+      }
+      table.schedule-table {
+        min-width: 100% !important;
+        font-size: 11pt !important;
+      }
+      .schedule-table th, .schedule-table td {
+        padding: 8px 10px !important;
+        border: 1px solid #ddd !important;
+      }
+    }
+
+    /* Utility visibility classes */
+    .hide-desktop {
+      display: none !important;
+    }
+
+    /* Floating Action Button (FAB) for mobile quick task entry */
     .fab-btn {
       position: fixed;
       bottom: 22px;
@@ -1315,128 +1191,81 @@
       font-size: 0.92rem;
       cursor: pointer;
       box-shadow: 0 4px 16px -2px oklch(0.48 0.15 145 / 0.35), 0 2px 6px -1px oklch(0 0 0 / 0.18);
+      transition: scale 150ms ease-out, background-color 150ms ease-out, box-shadow 150ms ease-out;
+    }
+    .fab-btn:active {
+      scale: 0.94;
     }
 
-    /* Print Styles */
-    @media print {
-      body {
-        background-color: white !important;
-        color: black !important;
-        padding-bottom: 0;
-      }
-      .app-header, .toolbar, .plot-bar, .btn, .col-actions, .modal-backdrop, .fab-btn {
-        display: none !important;
-      }
-      .table-container {
-        box-shadow: none !important;
-        border: 1px solid #ddd !important;
-      }
-      table.schedule-table {
-        min-width: 100% !important;
-        font-size: 11pt !important;
-      }
-      .schedule-table th, .schedule-table td {
-        padding: 8px 10px !important;
-        border: 1px solid #ddd !important;
-      }
-    }
-
-    /* Responsive Breakpoints */
-    .hide-desktop { display: none !important; }
-
+    /* Responsive adjustments */
     @media (max-width: 768px) {
-      .hide-mobile { display: none !important; }
-      .hide-desktop { display: inline-flex !important; }
-      .fab-btn { display: inline-flex; }
-
-      /* Hide redundant "+ Add Task" header button on mobile since FAB is active */
-      .btn-header-add {
+      .hide-mobile {
         display: none !important;
+      }
+      .hide-desktop {
+        display: inline-flex !important;
+      }
+      .fab-btn {
+        display: inline-flex;
       }
 
       .header-inner {
-        padding: 8px 12px;
+        padding: 10px 14px;
         gap: 8px;
       }
       .container {
-        padding: 8px 12px;
-        max-width: 100vw;
-        overflow-x: hidden;
-      }
-      .brand-title {
-        font-size: 1.05rem;
+        padding: 10px 12px;
       }
       .brand-title span.full-title {
         display: none;
       }
-      .badge-pill.main-tag {
+      .badge-pill {
         display: none;
+      }
+      .header-actions {
+        gap: 6px;
       }
       .btn {
         height: 36px;
         font-size: 0.82rem;
         padding-inline: 10px;
       }
+      .btn.icon-leading {
+        padding-inline-start: 8px;
+        padding-inline-end: 10px;
+      }
       .btn-icon {
         width: 36px;
         height: 36px;
       }
 
-      /* Stacked, ergonomic Plot Selector card on mobile */
-      .plot-bar {
-        padding: 10px 12px;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-        border-radius: 16px;
-      }
-      .plot-select-wrapper {
-        flex: 0 0 auto !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        height: 38px;
-      }
-      .plot-bar-controls {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        width: 100%;
-      }
-      .active-plot-badge-summary {
-        font-size: 0.74rem;
-        white-space: normal;
-        line-height: 1.3;
-        margin-left: 0;
-        width: 100%;
-      }
-
-      /* Clean, balanced 2x2 grid for metrics to prevent cut-off labels */
+      /* Compact 1-Row Metrics Ribbon (saves 200px+ vertical viewport height) */
       .stats-row {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 8px;
         margin-top: 10px;
       }
       .stat-card {
-        padding: 10px 12px;
-        border-radius: 14px;
-        flex-direction: row;
+        padding: 8px 6px;
+        border-radius: 16px;
+        flex-direction: column;
         align-items: center;
-        text-align: left;
-        gap: 10px;
+        text-align: center;
+        gap: 4px;
       }
       .stat-icon {
-        width: 34px;
-        height: 34px;
-        border-radius: 9px;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
       }
       .stat-icon svg {
-        width: 18px;
-        height: 18px;
+        width: 15px;
+        height: 15px;
       }
       .stat-label {
-        font-size: 0.72rem;
-        line-height: 1.2;
+        font-size: 0.68rem;
+        line-height: 1.15;
+        white-space: nowrap;
         font-weight: 600;
       }
       .stat-value {
@@ -1445,22 +1274,22 @@
         line-height: 1.1;
       }
 
+      /* Toolbar mobile ergonomics */
       .toolbar {
-        margin-top: 12px;
+        margin-top: 14px;
         gap: 8px;
       }
       .filter-chips {
         width: 100%;
         order: 1;
-        scrollbar-width: none;
-      }
-      .filter-chips::-webkit-scrollbar {
-        display: none;
+        padding-bottom: 4px;
       }
       .toolbar-right {
         width: 100%;
         order: 2;
         margin-left: 0;
+        display: flex;
+        align-items: center;
         justify-content: space-between;
         gap: 8px;
       }
@@ -1468,22 +1297,27 @@
         flex: 1 1 auto;
         min-width: 0;
       }
+      .search-input {
+        height: 34px;
+        font-size: 0.82rem;
+      }
+      .segmented-control {
+        flex-shrink: 0;
+      }
+      .segment-btn {
+        height: 28px;
+        padding: 0 10px;
+        font-size: 0.78rem;
+      }
 
-      /* Table Container horizontal isolation & sticky Date column */
-      .table-container {
-        border-radius: 16px;
-        margin-top: 12px;
-      }
-      .table-scroll-wrapper {
-        overscroll-behavior-x: contain;
-      }
+      /* Sticky date column for smooth horizontal swiping in Table view */
       .schedule-table th.col-date,
       .schedule-table td.col-date {
         position: sticky;
         left: 0;
         z-index: 5;
         background-color: var(--bg-surface);
-        box-shadow: 2px 0 6px -1px oklch(0 0 0 / 0.12);
+        box-shadow: 2px 0 6px -1px oklch(0 0 0 / 0.1);
       }
       .schedule-table thead th.col-date {
         background-color: var(--bg-surface-subtle);
@@ -1504,7 +1338,7 @@
         display: flex !important;
       }
 
-      /* Mobile Modal Sheet */
+      /* Mobile Modal: clean sheet presentation with pinned header and footer */
       .modal-backdrop {
         padding: 0;
         align-items: flex-end;
@@ -1518,11 +1352,18 @@
         width: 100%;
         max-width: 100%;
       }
-      .modal-dialog.confirm-dialog {
+      .modal-dialog.delete-dialog {
         height: auto;
         border-radius: 20px;
         margin: auto;
         width: calc(100% - 32px);
+      }
+      .modal-body {
+        padding: 14px 16px;
+        gap: 12px;
+      }
+      .modal-footer {
+        padding: 12px 16px;
       }
     }
   </style>
@@ -1544,13 +1385,13 @@
           <div class="brand-title">
             AgriFlow
             <span class="full-title text-muted" style="font-weight: 500; font-size: 0.95rem;">· Pomegranate Schedule</span>
-            <span class="badge-pill main-tag">Drip + Spray</span>
+            <span class="badge-pill">Drip + Spray</span>
           </div>
         </div>
       </div>
 
       <div class="header-actions">
-        <button id="btnOpenAddModal" class="btn btn-primary icon-leading btn-header-add" type="button" aria-label="Add new schedule entry">
+        <button id="btnOpenAddModal" class="btn btn-primary icon-leading" type="button" aria-label="Add new schedule entry">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1558,18 +1399,8 @@
           <span>Add Task</span>
         </button>
 
-        <button id="btnManagePlots" class="btn btn-plot icon-leading" type="button" aria-label="Manage Farm Plots" title="Manage Orchard Plots">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
-            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
-            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
-            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
-          </svg>
-          <span>Plots (<span id="headerPlotsCount">0</span>)</span>
-        </button>
-
         <button id="btnOpenShareModal" class="btn btn-secondary icon-leading" type="button" aria-label="Share or export schedule">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
             <polyline points="16 6 12 2 8 6"></polyline>
             <line x1="12" y1="2" x2="12" y2="15"></line>
@@ -1577,8 +1408,15 @@
           <span class="hide-mobile">Export</span>
         </button>
 
+        <button id="btnRestoreDefaults" class="btn-icon" type="button" aria-label="Restore master pomegranate schedule" title="Restore master schedule defaults">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+        </button>
+
         <button id="themeToggleBtn" class="btn-icon" type="button" aria-label="Toggle theme mode" title="Toggle dark / light theme">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg id="themeIconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -1595,45 +1433,11 @@
   </header>
 
   <main class="container">
-
     <!-- ==========================================================================
-         PLOT SWITCHER & SELECTOR BAR
-         ========================================================================== -->
-    <section class="plot-bar stagger-item" aria-label="Plot selection">
-      <div class="plot-select-wrapper">
-        <svg class="plot-icon-prefix" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-          <circle cx="12" cy="10" r="3"></circle>
-        </svg>
-        <select id="activePlotFilterSelect" class="form-control plot-select" aria-label="Select Farm Plot to View">
-          <!-- Dynamic Options injected via JS -->
-        </select>
-      </div>
-
-      <div class="plot-bar-controls">
-        <label class="include-farmwide-wrap" title="Include tasks marked farm-wide for All Plots">
-          <input type="checkbox" id="chkIncludeFarmWide">
-          <span>Include Farm-Wide</span>
-        </label>
-
-        <button id="btnQuickAddPlot" class="btn btn-secondary icon-leading" type="button" style="height: 32px; font-size: 0.8rem; padding-inline: 10px;">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          <span>New Plot</span>
-        </button>
-      </div>
-
-      <div id="activePlotSummary" class="active-plot-badge-summary">
-        <!-- Injected via JS -->
-      </div>
-    </section>
-
-    <!-- ==========================================================================
-         OVERVIEW METRICS (DYNAMIC PER SELECTED PLOT)
+         OVERVIEW METRICS
          ========================================================================== -->
     <section class="stats-row stagger-item" aria-label="Schedule statistics">
+
       <div class="stat-card">
         <div class="stat-icon drip">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1667,23 +1471,8 @@
           </svg>
         </div>
         <div>
-          <div class="stat-label">Completed</div>
+          <div class="stat-label">Completed Tasks</div>
           <div id="statProgress" class="stat-value tabular-num">0%</div>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon plot">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
-            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
-            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
-            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
-          </svg>
-        </div>
-        <div>
-          <div class="stat-label">Total Tasks</div>
-          <div id="statTotalPlotTasks" class="stat-value tabular-num">0</div>
         </div>
       </div>
     </section>
@@ -1696,7 +1485,7 @@
         <button class="chip-filter active" data-filter="all" type="button">All (<span id="countAll">0</span>)</button>
         <button class="chip-filter" data-filter="pending" type="button">Pending (<span id="countPending">0</span>)</button>
         <button class="chip-filter" data-filter="completed" type="button">Completed (<span id="countCompleted">0</span>)</button>
-        <button class="chip-filter" data-filter="today" type="button">Upcoming / Today</button>
+        <button class="chip-filter" data-filter="today" type="button">Today / Upcoming</button>
       </div>
 
       <div class="toolbar-right">
@@ -1705,7 +1494,7 @@
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" id="scheduleSearch" class="search-input" placeholder="Search dose, fertilizer, plot..." aria-label="Search schedule">
+          <input type="text" id="scheduleSearch" class="search-input" placeholder="Search drip, spray, dose..." aria-label="Search schedule">
         </div>
 
         <div class="segmented-control" role="group" aria-label="Display View Mode">
@@ -1730,14 +1519,14 @@
     </div>
 
     <!-- ==========================================================================
-         VIEW 1: COMBINED TABLE (WITH PLOT IDENTIFICATION)
+         VIEW 1: COMBINED TABLE (SHOWS BOTH DRIP AND SPRAY ON THE TABLE)
          ========================================================================== -->
     <div id="tableContainer" class="table-container stagger-item">
       <div class="table-scroll-wrapper">
         <table class="schedule-table" id="farmingTable" aria-label="Combined Pomegranate Drip and Spray Schedule">
           <thead>
             <tr>
-              <th class="col-date" scope="col">Date &amp; Plot</th>
+              <th class="col-date" scope="col">Date</th>
               <th class="col-drip" scope="col">
                 <span style="display: inline-flex; align-items: center; gap: 6px; color: var(--drip-solid);">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
@@ -1750,7 +1539,7 @@
                   Foliar Spray (Canopy Application)
                 </span>
               </th>
-              <th class="col-actions" scope="col">Actions</th>
+              <th class="col-actions" scope="col">Edit</th>
             </tr>
           </thead>
           <tbody id="scheduleTableBody">
@@ -1762,7 +1551,7 @@
 
     <!-- ==========================================================================
          VIEW 2: MOBILE CARDS TIMELINE
-    <!-- View 2: Mobile Cards Timeline -->
+         ========================================================================== -->
     <div id="cardsContainer" class="cards-view-container" aria-label="Card schedule items">
       <!-- Injected via JS -->
     </div>
@@ -1770,18 +1559,19 @@
     <!-- Empty State -->
     <div id="emptyScheduleState" class="empty-state" style="display: none;">
       <h3 style="font-size: 1.15rem; font-weight: 700;">No schedule entries found</h3>
-      <p style="color: var(--text-muted); max-width: 440px; margin: 6px auto 16px; font-size: 0.9rem;">
-        Your schedule is currently empty. Add your first farm task or configure plots.
+      <p style="color: var(--text-muted); max-width: 420px; margin: 6px auto 16px; font-size: 0.9rem;">
+        No tasks match your current filter, or your schedule is currently empty.
       </p>
       <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-        <button class="btn btn-secondary" onclick="openPlotsModalUI()">+ Manage Plots</button>
-        <button class="btn btn-primary" onclick="openAddTaskModal()">+ Add New Task</button>
+        <button class="btn btn-secondary" onclick="clearFilters()">Reset Filters</button>
+        <button class="btn btn-primary" onclick="resetToMasterSchedule()">Load Master Schedule</button>
+        <button class="btn btn-secondary" onclick="openAddTaskModal()">+ Add New Task</button>
       </div>
     </div>
   </main>
 
   <!-- ==========================================================================
-       MODAL: ADD / EDIT SCHEDULE ENTRY
+       MODAL: ADD / EDIT SCHEDULE ENTRY (FULLY SCROLLABLE POPUP)
        ========================================================================== -->
   <div id="taskModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-dialog">
@@ -1805,35 +1595,20 @@
         <div class="modal-body">
           <input type="hidden" id="editTaskId">
 
-          <!-- Plot Assignment & Date Selection -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div class="form-group">
-              <label for="inputTaskPlot" class="form-label">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Assigned Plot
-              </label>
-              <select id="inputTaskPlot" class="form-control" required>
-                <!-- Populated dynamically via JS -->
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="inputTaskDate" class="form-label">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="16" y1="2" x2="16" y2="6"></line>
-                  <line x1="8" y1="2" x2="8" y2="6"></line>
-                  <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-                Schedule Date
-              </label>
-              <input type="date" id="inputTaskDate" class="form-control tabular-num" required>
-            </div>
+          <!-- Calendar Date Picker -->
+          <div class="form-group">
+            <label for="inputTaskDate" class="form-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Schedule Date
+            </label>
+            <input type="date" id="inputTaskDate" class="form-control tabular-num" required>
+            <span id="datePreview" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;"></span>
           </div>
-          <span id="datePreview" style="font-size: 0.78rem; color: var(--text-muted); margin-top: -6px;"></span>
 
           <!-- Section: Drip Fertigation -->
           <div class="modal-subcard drip-card">
@@ -1850,7 +1625,9 @@
             <div id="dripFieldsContainer" style="display: flex; flex-direction: column; gap: 10px;">
               <div class="form-group">
                 <label class="form-label">Fertilizer &amp; Soluble Nutrients</label>
-                <div id="dripFertRows" class="fert-rows"></div>
+                <div id="dripFertRows" class="fert-rows">
+                  <!-- Dynamic rows added via JS -->
+                </div>
                 <button type="button" class="fert-add-btn" onclick="addFertilizerRow('dripFertRows')">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                   Add Fertilizer
@@ -1879,7 +1656,9 @@
             <div id="sprayFieldsContainer" style="display: flex; flex-direction: column; gap: 10px;">
               <div class="form-group">
                 <label class="form-label">Formulation &amp; Chemicals</label>
-                <div id="sprayFertRows" class="fert-rows"></div>
+                <div id="sprayFertRows" class="fert-rows">
+                  <!-- Dynamic rows added via JS -->
+                </div>
                 <button type="button" class="fert-add-btn" onclick="addFertilizerRow('sprayFertRows')">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                   Add Chemical
@@ -1903,92 +1682,7 @@
   </div>
 
   <!-- ==========================================================================
-       MODAL: PLOT MANAGEMENT MODAL
-       ========================================================================== -->
-  <div id="plotModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="plotModalHeading">
-    <div class="modal-dialog" style="max-width: 620px;">
-      <div class="modal-header">
-        <h3 id="plotModalHeading" class="modal-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
-            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
-            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
-            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
-          </svg>
-          <span>Farm Plot Management</span>
-        </h3>
-        <button class="btn-icon" id="btnClosePlotModal" type="button" aria-label="Close plot manager">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <!-- Form for Add/Edit Plot -->
-        <div class="modal-subcard plot-card">
-          <strong id="plotFormHeaderTitle" style="font-size: 0.95rem; color: var(--plot-solid); display: flex; align-items: center; gap: 6px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            Add New Farm Plot
-          </strong>
-
-          <form id="plotForm" style="display: flex; flex-direction: column; gap: 10px;">
-            <input type="hidden" id="editPlotId">
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <div class="form-group">
-                <label for="inputPlotName" class="form-label">Plot Name *</label>
-                <input type="text" id="inputPlotName" class="form-control" placeholder="e.g. Plot 1 - North Block" required>
-              </div>
-
-              <div class="form-group">
-                <label for="inputPlotArea" class="form-label">Acreage / Area *</label>
-                <input type="text" id="inputPlotArea" class="form-control" placeholder="e.g. 4.0 Acres" required>
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <div class="form-group">
-                <label for="inputPlotTrees" class="form-label">Trees / Variety</label>
-                <input type="text" id="inputPlotTrees" class="form-control" placeholder="e.g. 1,400 Bhagwa Trees">
-              </div>
-
-              <div class="form-group">
-                <label for="inputPlotNotes" class="form-label">Irrigation / Notes</label>
-                <input type="text" id="inputPlotNotes" class="form-control" placeholder="e.g. Drip Line 1 · Sand Filter">
-              </div>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;">
-              <button type="button" id="btnCancelEditPlot" class="btn btn-secondary" style="height: 34px; font-size: 0.82rem; display: none;">Cancel Edit</button>
-              <button type="submit" id="btnSubmitPlot" class="btn btn-primary" style="height: 34px; font-size: 0.82rem;">Save Plot</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Existing Plots List -->
-        <div>
-          <div style="font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px;">
-            Current Farm Blocks (<span id="plotListCount">0</span>)
-          </div>
-          <div id="plotsListContainer" class="plot-list-grid">
-            <!-- Dynamic Plots Cards injected by JS -->
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="btnDonePlotsModal">Done</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==========================================================================
-       MODAL: EXPORT & WHATSAPP
+       MODAL: EXPORT / SHARE MODAL
        ========================================================================== -->
   <div id="shareModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
     <div class="modal-dialog" style="max-width: 520px;">
@@ -2011,10 +1705,7 @@
 
       <div class="modal-body">
         <div class="modal-subcard">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <strong style="font-size: 0.88rem;">WhatsApp Task Dispatch Message:</strong>
-            <span id="whatsAppPlotBadge" class="badge-pill plot-indicator">All Plots</span>
-          </div>
+          <strong style="font-size: 0.9rem;">WhatsApp Today/Next Task Message:</strong>
           <pre id="whatsAppPreviewText" class="tabular-num" style="background-color: var(--bg-inset); padding: 12px; border-radius: 8px; font-size: 0.8rem; white-space: pre-wrap; line-height: 1.45; border: 1px solid var(--border-color);"></pre>
           <div style="display: flex; gap: 8px; margin-top: 4px;">
             <button id="btnCopyWhatsAppText" class="btn btn-secondary icon-leading" type="button" style="height: 34px; font-size: 0.82rem;">
@@ -2057,12 +1748,12 @@
   </div>
 
   <!-- ==========================================================================
-       MODAL: CUSTOM CONFIRMATION MODAL (NO ALERT() / CONFIRM())
+       MODAL: CUSTOM DELETE CONFIRMATION DIALOG (BETTER-UI SPEC)
        ========================================================================== -->
-  <div id="confirmModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
-    <div class="modal-dialog confirm-dialog">
+  <div id="deleteModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal-dialog delete-dialog">
       <div class="modal-body">
-        <div class="confirm-icon-wrap" aria-hidden="true">
+        <div class="delete-icon-wrap" aria-hidden="true">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="3 6 5 6 21 6"></polyline>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -2070,24 +1761,22 @@
             <line x1="14" y1="11" x2="14" y2="17"></line>
           </svg>
         </div>
-        <h3 id="confirmModalTitle" class="modal-title" style="justify-content: center; font-size: 1.15rem;">Confirm Action</h3>
-        <p id="confirmModalMessage" style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.45;">Are you sure you want to proceed?</p>
-        <div id="confirmModalPreview" style="width: 100%;"></div>
+        <h3 id="deleteModalTitle" class="delete-title">Delete Task?</h3>
+        <p class="delete-message">Are you sure you want to permanently remove this scheduled task from your pomegranate calendar?</p>
+        
+        <div id="deleteTaskPreview" class="delete-preview-card">
+          <!-- Populated by JS -->
+        </div>
       </div>
 
-      <div class="modal-footer" style="justify-content: center; gap: 12px;">
-        <button type="button" class="btn btn-secondary" id="btnCancelConfirm">Cancel</button>
-        <button type="button" class="btn btn-danger" id="btnExecuteConfirm">Confirm</button>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCancelDelete">Cancel</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmDelete">Delete Task</button>
       </div>
     </div>
   </div>
 
-  <!-- In-App Toast Notification Banner -->
-  <div id="toastNotification" class="toast-container" role="status" aria-live="polite">
-    <span id="toastMessage">Action completed</span>
-  </div>
-
-  <!-- Floating Action Button for Mobile Quick Task Entry -->
+  <!-- Floating Action Button for Mobile -->
   <button id="btnFabAddTask" class="fab-btn hide-desktop" type="button" aria-label="Add new schedule entry">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -2097,304 +1786,253 @@
   </button>
 
   <!-- ==========================================================================
-       JAVASCRIPT: POMEGRANATE + MULTI-PLOT LOGIC
+       JAVASCRIPT: POMEGRANATE ONLY APPLICATION LOGIC
        ========================================================================== -->
   <script>
     /* --------------------------------------------------------------------------
-       1. DATA STRUCTURES (CLEAN SLATE - DUMMY DATA REMOVED)
+       1. POMEGRANATE DRIP & SPRAY MASTER SCHEDULE
        -------------------------------------------------------------------------- */
-    const DEFAULT_PLOTS = [];
+    const POMEGRANATE_SCHEDULE_TEMPLATE = [
+      {
+        id: 'pom-1',
+        offset: 1,
+        done: true,
+        drip: {
+          items: ['Hydrogen Peroxide with Silver (1.5 Liters/acre)'],
+          runtime: '1.5 Hours'
+        },
+        spray: {
+          items: ['Bordeaux Mixture (1%) / Copper Oxychloride 50% WP'],
+          dose: '3.0 g / Liter of water'
+        }
+      },
+      {
+        id: 'pom-2',
+        offset: 10,
+        done: true,
+        drip: {
+          items: ['12:61:00 (MAP) 4.0 kg', 'Humic Acid 98% (500g)'],
+          runtime: '2.0 Hours'
+        },
+        spray: {
+          items: ['Chlorantraniliprole 18.5% SC'],
+          dose: '0.4 ml / Liter of water'
+        }
+      },
+      {
+        id: 'pom-3',
+        offset: 20,
+        done: false,
+        drip: {
+          items: ['19:19:19 (4.0 kg)', 'Zinc Chelate EDTA 12% (500g)'],
+          runtime: '2.5 Hours'
+        },
+        spray: {
+          items: ['Gibberellic Acid (GA3) 40 ppm', 'Urea'],
+          dose: '1g / 25L + 10g / L'
+        }
+      },
+      {
+        id: 'pom-4',
+        offset: 30,
+        done: false,
+        drip: {
+          items: ['12:61:00 (5.0 kg)', 'Magnesium Sulphate (3.0 kg)'],
+          runtime: '2.5 Hours'
+        },
+        spray: {
+          items: ['Flonicamid 50% WG', 'Neem Oil 10,000 ppm'],
+          dose: '0.4 g/L + 2.0 ml/L'
+        }
+      },
+      {
+        id: 'pom-5',
+        offset: 42,
+        done: false,
+        drip: {
+          items: ['00:52:34 (MKP) 5.0 kg', 'Solubor (Boron 20%) 250g'],
+          runtime: '2.5 Hours'
+        },
+        spray: {
+          items: ['Amino Acid Complex 50%', 'Nitrobenzene 20%'],
+          dose: '2.0 ml/L + 1.5 ml/L'
+        }
+      },
+      {
+        id: 'pom-6',
+        offset: 55,
+        done: false,
+        drip: {
+          items: ['13:40:13 (4.0 kg)', 'Calcium Nitrate (4.0 kg)'],
+          runtime: '2.5 Hours'
+        },
+        spray: {
+          items: ['Azoxystrobin 18.2% + Difenoconazole 11.4% SC'],
+          dose: '1.0 ml / Liter of water'
+        }
+      },
+      {
+        id: 'pom-7',
+        offset: 70,
+        done: false,
+        drip: {
+          items: ['13:00:45 (Potassium Nitrate) 5.0 kg', 'Boron (200g)'],
+          runtime: '3.0 Hours'
+        },
+        spray: {
+          items: ['Spinetoram 11.7% SC'],
+          dose: '0.8 ml / Liter of water'
+        }
+      },
+      {
+        id: 'pom-8',
+        offset: 85,
+        done: false,
+        drip: {
+          items: ['00:52:34 (4.0 kg)', '13:00:45 (4.0 kg)'],
+          runtime: '3.0 Hours'
+        },
+        spray: {
+          items: ['Calcium Chelate', 'Foliar Boron 20%'],
+          dose: '1.5 g / Liter of water'
+        }
+      },
+      {
+        id: 'pom-9',
+        offset: 100,
+        done: false,
+        drip: {
+          items: ['Calcium Nitrate (5.0 kg/acre)'],
+          runtime: '2.5 Hours'
+        },
+        spray: {
+          items: ['Streptomycin Sulphate 90%', 'Copper Oxychloride'],
+          dose: '0.5 g/L + 2.5 g/L'
+        }
+      },
+      {
+        id: 'pom-10',
+        offset: 115,
+        done: false,
+        drip: {
+          items: ['13:00:45 (6.0 kg)', 'Magnesium Sulphate (3.0 kg)'],
+          runtime: '3.0 Hours'
+        },
+        spray: {
+          items: ['Flonicamid 50% WG'],
+          dose: '0.4 g / Liter of water'
+        }
+      },
+      {
+        id: 'pom-11',
+        offset: 130,
+        done: false,
+        drip: {
+          items: ['00:00:50 (Potassium Sulphate - SOP) 6.0 kg'],
+          runtime: '3.0 Hours'
+        },
+        spray: {
+          items: ['Potassium Phosphite (Foliar)'],
+          dose: '2.5 ml / Liter of water'
+        }
+      },
+      {
+        id: 'pom-12',
+        offset: 145,
+        done: false,
+        drip: {
+          items: ['00:00:50 (SOP) 7.0 kg/acre'],
+          runtime: '3.0 Hours'
+        },
+        spray: {
+          items: ['Chelated Micronutrient Grade II'],
+          dose: '2.0 g / Liter of water'
+        }
+      },
+      {
+        id: 'pom-13',
+        offset: 160,
+        done: false,
+        drip: {
+          items: ['00:00:50 (SOP) 5.0 kg/acre'],
+          runtime: '2.5 Hours'
+        },
+        spray: {
+          items: ['Potassium Silicate (Foliar Silica Shield)'],
+          dose: '2.5 ml / Liter of water'
+        }
+      }
+    ];
 
-    const POMEGRANATE_SCHEDULE_TEMPLATE = [];
-
+    /* Builds the master schedule with REAL calendar dates.
+       Template offsets (1, 10, 20 ... days) are mapped onto actual dates,
+       with Day-1 anchored to today the moment the schedule is built. */
     function buildMasterSchedule() {
+      const today = getTodayIso();
+      return POMEGRANATE_SCHEDULE_TEMPLATE.map(entry => ({
+        id: entry.id,
+        date: addDaysIso(today, entry.offset - 1),
+        done: !!entry.done,
+        drip: entry.drip ? JSON.parse(JSON.stringify(entry.drip)) : null,
+        spray: entry.spray ? JSON.parse(JSON.stringify(entry.spray)) : null
+      }));
+    }
+
+    /* One-time migration: older saves stored a numeric "day" offset relative to a
+       cycle start date. Convert those to absolute calendar dates and drop the
+       day field entirely, so the Day-N concept no longer exists in data. */
+    function migrateLegacySchedule(items) {
+      const legacyStart = localStorage.getItem('agriflow_pomegranate_start_date');
+      const baseDate = isValidIsoDate(legacyStart) ? legacyStart : getTodayIso();
+      const migrated = items.map(item => {
+        if (isValidIsoDate(item.date)) {
+          delete item.day;
+          return item;
+        }
+        const offset = Number.isFinite(item.day) && item.day > 0 ? item.day : 1;
+        return {
+          id: item.id || ('pom-migrated-' + Date.now() + '-' + Math.floor(Math.random() * 1000)),
+          date: addDaysIso(baseDate, offset - 1),
+          done: !!item.done,
+          drip: item.drip || null,
+          spray: item.spray || null
+        };
+      });
+      localStorage.removeItem('agriflow_pomegranate_start_date');
+      return migrated;
+    }
+
+    /* Helper: get display text from items array (join with ' + ') — handles legacy title string too */
+    function getItemsText(obj) {
+      if (!obj) return '';
+      if (obj.items && Array.isArray(obj.items)) return obj.items.filter(s => s.trim()).join(' + ');
+      if (obj.title) return obj.title; // legacy fallback
+      return '';
+    }
+
+    /* Helper: get items array from object — handles legacy title string */
+    function getItemsArray(obj) {
+      if (!obj) return [];
+      if (obj.items && Array.isArray(obj.items)) return obj.items.filter(s => s.trim());
+      if (obj.title) return obj.title.split(' + ').map(s => s.trim()).filter(Boolean);
       return [];
+    }
+
+    /* Helper: check if object has items */
+    function hasItems(obj) {
+      return getItemsArray(obj).length > 0;
     }
 
     /* --------------------------------------------------------------------------
        2. APPLICATION STATE
        -------------------------------------------------------------------------- */
     let scheduleData = [];
-    let plotsData = [];
-    let activePlotFilter = 'all'; // 'all' or plot ID
-    let activeStatusFilter = 'all'; // 'all' | 'pending' | 'completed' | 'today'
+    let activeFilter = 'all';
     let searchQuery = '';
     let currentViewMode = (typeof window !== 'undefined' && window.innerWidth < 768) ? 'cards' : 'table';
-    let pendingConfirmAction = null;
 
     /* --------------------------------------------------------------------------
-       3. TOAST & CONFIRM DIALOG HELPERS (REPLACES NATIVE ALERT/CONFIRM)
-       -------------------------------------------------------------------------- */
-    let toastTimeout = null;
-    function showToast(message) {
-      const container = document.getElementById('toastNotification');
-      const msgEl = document.getElementById('toastMessage');
-      if (!container || !msgEl) return;
-      msgEl.textContent = message;
-      container.classList.add('show');
-      if (toastTimeout) clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        container.classList.remove('show');
-      }, 2800);
-    }
-
-    function openConfirmModal(config) {
-      document.getElementById('confirmModalTitle').textContent = config.title || 'Confirm Action';
-      document.getElementById('confirmModalMessage').textContent = config.message || 'Are you sure?';
-      const previewEl = document.getElementById('confirmModalPreview');
-      previewEl.innerHTML = config.previewHtml || '';
-
-      const confirmBtn = document.getElementById('btnExecuteConfirm');
-      confirmBtn.textContent = config.confirmButtonText || 'Confirm';
-      if (config.isDanger === false) {
-        confirmBtn.className = 'btn btn-primary';
-      } else {
-        confirmBtn.className = 'btn btn-danger';
-      }
-
-      pendingConfirmAction = config.onConfirm;
-      openModal('confirmModal');
-    }
-
-    function handleConfirmExecution() {
-      if (typeof pendingConfirmAction === 'function') {
-        pendingConfirmAction();
-        pendingConfirmAction = null;
-      }
-      closeModal('confirmModal');
-    }
-
-    /* --------------------------------------------------------------------------
-       4. PLOT DATA ACCESS & HELPERS
-       -------------------------------------------------------------------------- */
-    function getPlotById(plotId) {
-      if (!plotId || plotId === 'all') return null;
-      return plotsData.find(p => p.id === plotId) || null;
-    }
-
-    function getPlotDisplayName(plotId) {
-      if (!plotId || plotId === 'all') return 'All Plots (Farm)';
-      const p = getPlotById(plotId);
-      return p ? p.name : 'Unknown Plot';
-    }
-
-    function getPlotShortName(plotId) {
-      if (!plotId || plotId === 'all') return 'All Plots';
-      const plot = getPlotById(plotId);
-      if (!plot) return 'Plot';
-      const match = plot.name.match(/Plot\s*\d+/i);
-      if (match) return match[0];
-      return plot.name.length > 9 ? plot.name.substring(0, 8) + '…' : plot.name;
-    }
-
-    function getPlotTasksCount(plotId) {
-      if (plotId === 'all') return scheduleData.length;
-      return scheduleData.filter(t => t.plotId === plotId).length;
-    }
-
-    function updateActivePlotSummary() {
-      const summaryEl = document.getElementById('activePlotSummary');
-      if (summaryEl) {
-        if (plotsData.length === 0) {
-          summaryEl.innerHTML = `No plots added yet · Click <strong>New Plot</strong> to create one`;
-          return;
-        }
-        if (activePlotFilter === 'all') {
-          const totalAcres = plotsData.reduce((acc, p) => acc + (parseFloat(p.area) || 0), 0);
-          summaryEl.innerHTML = `Showing entire farm · <strong>${plotsData.length} Plot${plotsData.length > 1 ? 's' : ''}</strong> ${totalAcres > 0 ? `(~${totalAcres.toFixed(1)} Ac)` : ''}`;
-        } else {
-          const curr = getPlotById(activePlotFilter);
-          const tasksCount = getPlotTasksCount(activePlotFilter);
-          if (curr) {
-            summaryEl.innerHTML = `Active: <strong>${escapeHtml(curr.name)}</strong> · ${escapeHtml(curr.area)} (${tasksCount} tasks)`;
-          } else {
-            summaryEl.innerHTML = '';
-          }
-        }
-      }
-    }
-
-    function populatePlotDropdowns() {
-      // 1. Toolbar Active Plot Filter
-      const activeSelect = document.getElementById('activePlotFilterSelect');
-      if (activeSelect) {
-        let opts = `<option value="all" ${activePlotFilter === 'all' ? 'selected' : ''}>All Plots (Whole Farm)</option>`;
-        plotsData.forEach(p => {
-          const selected = activePlotFilter === p.id ? 'selected' : '';
-          opts += `<option value="${p.id}" ${selected}>${escapeHtml(p.name)} (${escapeHtml(p.area)})</option>`;
-        });
-        activeSelect.innerHTML = opts;
-        activeSelect.value = activePlotFilter;
-      }
-
-      // 2. Task Modal Plot Selector
-      const taskPlotSelect = document.getElementById('inputTaskPlot');
-      if (taskPlotSelect) {
-        let opts = `<option value="all">All Plots (Whole Farm)</option>`;
-        plotsData.forEach(p => {
-          opts += `<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.area)})</option>`;
-        });
-        taskPlotSelect.innerHTML = opts;
-      }
-
-      // 3. Header badge counts
-      const headerPlotsCount = document.getElementById('headerPlotsCount');
-      if (headerPlotsCount) headerPlotsCount.textContent = plotsData.length;
-      
-      const plotListCount = document.getElementById('plotListCount');
-      if (plotListCount) plotListCount.textContent = plotsData.length;
-
-      updateActivePlotSummary();
-    }
-
-    function renderPlotsManagerList() {
-      const container = document.getElementById('plotsListContainer');
-      if (!container) return;
-      container.innerHTML = '';
-
-      if (plotsData.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.88rem;">No plots created yet. Add your first orchard block above.</div>`;
-        return;
-      }
-
-      plotsData.forEach(plot => {
-        const tasksCount = getPlotTasksCount(plot.id);
-        const card = document.createElement('div');
-        card.className = 'plot-item-card';
-        card.innerHTML = `
-          <div class="plot-info">
-            <div class="plot-name-row">
-              <span class="plot-name">${escapeHtml(plot.name)}</span>
-              <span class="badge-pill plot-indicator">${escapeHtml(plot.area)}</span>
-              <span class="badge-pill" style="font-size: 0.68rem;">${tasksCount} Tasks</span>
-            </div>
-            <div class="plot-meta-sub">
-              ${plot.trees ? `<span>🌳 ${escapeHtml(plot.trees)}</span>` : ''}
-              ${plot.notes ? `<span>💧 ${escapeHtml(plot.notes)}</span>` : ''}
-            </div>
-          </div>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn-icon" style="width: 32px; height: 32px; border-radius: 8px;" onclick="startEditPlot('${plot.id}')" title="Edit plot" aria-label="Edit plot">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
-            </button>
-            <button class="btn-icon" style="width: 32px; height: 32px; border-radius: 8px; color: oklch(0.5 0.2 25);" onclick="requestDeletePlot('${plot.id}')" title="Delete plot" aria-label="Delete plot">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
-            </button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function startEditPlot(id) {
-      const plot = plotsData.find(p => p.id === id);
-      if (!plot) return;
-      document.getElementById('editPlotId').value = plot.id;
-      document.getElementById('inputPlotName').value = plot.name;
-      document.getElementById('inputPlotArea').value = plot.area;
-      document.getElementById('inputPlotTrees').value = plot.trees || '';
-      document.getElementById('inputPlotNotes').value = plot.notes || '';
-      document.getElementById('plotFormHeaderTitle').innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path></svg>
-        Edit Plot: ${escapeHtml(plot.name)}
-      `;
-      document.getElementById('btnSubmitPlot').textContent = 'Update Plot';
-      document.getElementById('btnCancelEditPlot').style.display = 'inline-flex';
-      document.getElementById('inputPlotName').focus();
-    }
-
-    function cancelEditPlot() {
-      document.getElementById('plotForm').reset();
-      document.getElementById('editPlotId').value = '';
-      document.getElementById('plotFormHeaderTitle').innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        Add New Farm Plot
-      `;
-      document.getElementById('btnSubmitPlot').textContent = 'Save Plot';
-      document.getElementById('btnCancelEditPlot').style.display = 'none';
-    }
-
-    function savePlotFromForm(e) {
-      e.preventDefault();
-      const id = document.getElementById('editPlotId').value.trim();
-      const name = document.getElementById('inputPlotName').value.trim();
-      const area = document.getElementById('inputPlotArea').value.trim();
-      const trees = document.getElementById('inputPlotTrees').value.trim();
-      const notes = document.getElementById('inputPlotNotes').value.trim();
-
-      if (!name || !area) {
-        showToast('Please provide a Plot Name and Area.');
-        return;
-      }
-
-      if (id) {
-        const existing = plotsData.find(p => p.id === id);
-        if (existing) {
-          existing.name = name;
-          existing.area = area;
-          existing.trees = trees;
-          existing.notes = notes;
-          showToast(`Updated "${name}"`);
-        }
-      } else {
-        const newPlot = {
-          id: 'plot-' + Date.now(),
-          name,
-          area,
-          trees,
-          notes
-        };
-        plotsData.push(newPlot);
-        showToast(`Created new plot "${name}"`);
-      }
-
-      savePlotsToLocalStorage();
-      cancelEditPlot();
-      populatePlotDropdowns();
-      renderPlotsManagerList();
-      renderApp();
-    }
-
-    function requestDeletePlot(id) {
-      const plot = plotsData.find(p => p.id === id);
-      if (!plot) return;
-
-      const associatedTasks = scheduleData.filter(t => t.plotId === id).length;
-      openConfirmModal({
-        title: `Delete Plot: ${plot.name}?`,
-        message: associatedTasks > 0
-          ? `This plot has ${associatedTasks} assigned tasks. If deleted, these tasks will be automatically re-assigned to "All Plots (Farm)".`
-          : `Are you sure you want to permanently delete this farm plot?`,
-        confirmButtonText: 'Delete Plot',
-        isDanger: true,
-        previewHtml: `<div class="plot-item-card" style="margin-top: 6px;"><div class="plot-info"><strong>${escapeHtml(plot.name)}</strong><span style="font-size:0.8rem;color:var(--text-muted);">${escapeHtml(plot.area)} · ${escapeHtml(plot.trees || '')}</span></div></div>`,
-        onConfirm: () => {
-          // Re-assign tasks to 'all'
-          scheduleData.forEach(t => {
-            if (t.plotId === id) t.plotId = 'all';
-          });
-          plotsData = plotsData.filter(p => p.id !== id);
-          if (activePlotFilter === id) {
-            activePlotFilter = 'all';
-          }
-          savePlotsToLocalStorage();
-          saveScheduleToLocalStorage();
-          populatePlotDropdowns();
-          renderPlotsManagerList();
-          renderApp();
-          showToast(`Plot "${plot.name}" removed.`);
-        }
-      });
-    }
-
-    /* --------------------------------------------------------------------------
-       5. THEME SWITCH WITH FLICKER SUPPRESSION
+       3. THEME SWITCH WITH TRANSITION SUPPRESSION (BETTER-UI SPEC)
        -------------------------------------------------------------------------- */
     function toggleTheme() {
       const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
@@ -2405,6 +2043,7 @@
       document.head.append(style);
 
       void document.body.offsetHeight;
+
       document.documentElement.setAttribute('data-theme', targetTheme);
       localStorage.setItem('agriflow_pomegranate_theme', targetTheme);
 
@@ -2414,7 +2053,7 @@
     }
 
     /* --------------------------------------------------------------------------
-       6. DATE & ITEM HELPERS
+       4. DATE HELPERS (LOCAL-TIMEZONE SAFE · PLAIN CALENDAR DATES, NO "DAY N")
        -------------------------------------------------------------------------- */
     function getTodayIso() {
       const now = new Date();
@@ -2454,64 +2093,27 @@
       return isValidIsoDate(isoDateStr) && isoDateStr >= getTodayIso();
     }
 
-    function getItemsText(obj) {
-      if (!obj) return '';
-      if (obj.items && Array.isArray(obj.items)) return obj.items.filter(s => s.trim()).join(' + ');
-      if (obj.title) return obj.title;
-      return '';
-    }
-
-    function getItemsArray(obj) {
-      if (!obj) return [];
-      if (obj.items && Array.isArray(obj.items)) return obj.items.filter(s => s.trim());
-      if (obj.title) return obj.title.split(' + ').map(s => s.trim()).filter(Boolean);
-      return [];
-    }
-
-    function hasItems(obj) {
-      return getItemsArray(obj).length > 0;
-    }
-
     /* --------------------------------------------------------------------------
-       7. MAIN RENDERING (TABLE & CARDS TIMELINE)
+       5. RENDERING (BOTH DRIP AND SPRAY ON THE TABLE)
        -------------------------------------------------------------------------- */
     function renderApp() {
       scheduleData.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 
-      const includeFarmWide = !!document.getElementById('chkIncludeFarmWide')?.checked;
-
-      // Filter by Plot and Status and Search
       const filtered = scheduleData.filter(item => {
-        // 1. Plot Filter
-        if (activePlotFilter !== 'all') {
-          if (includeFarmWide) {
-            if (item.plotId !== activePlotFilter && item.plotId !== 'all') {
-              return false;
-            }
-          } else {
-            if (item.plotId !== activePlotFilter) {
-              return false;
-            }
-          }
+        const fmt = formatDateIso(item.date);
+        
+        if (activeFilter === 'pending' && item.done) return false;
+        if (activeFilter === 'completed' && !item.done) return false;
+        if (activeFilter === 'today') {
+          if (!isUpcomingOrToday(item.date)) return false;
         }
 
-        // 2. Status Filter
-        if (activeStatusFilter === 'pending' && item.done) return false;
-        if (activeStatusFilter === 'completed' && !item.done) return false;
-        if (activeStatusFilter === 'today' && !isUpcomingOrToday(item.date)) return false;
-
-        // 3. Search Query
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
-          const fmt = formatDateIso(item.date);
-          const plotObj = getPlotById(item.plotId);
-          const plotName = plotObj ? plotObj.name.toLowerCase() : 'all plots';
-
           const matchDate = fmt.formatted.toLowerCase().includes(q) || fmt.weekday.toLowerCase().includes(q) || (item.date || '').includes(q);
-          const matchPlot = plotName.includes(q);
           const matchDrip = item.drip ? (getItemsText(item.drip) + ' ' + (item.drip.runtime || '')).toLowerCase().includes(q) : false;
           const matchSpray = item.spray ? (getItemsText(item.spray) + ' ' + (item.spray.dose || '')).toLowerCase().includes(q) : false;
-          if (!matchDate && !matchPlot && !matchDrip && !matchSpray) {
+          if (!matchDate && !matchDrip && !matchSpray) {
             return false;
           }
         }
@@ -2519,17 +2121,13 @@
         return true;
       });
 
-      // Filtered Stats (Scoped to active plot)
-      const plotScopedTasks = activePlotFilter === 'all'
-        ? scheduleData
-        : scheduleData.filter(i => includeFarmWide ? (i.plotId === activePlotFilter || i.plotId === 'all') : (i.plotId === activePlotFilter));
-
-      const totalCount = plotScopedTasks.length;
-      const completedCount = plotScopedTasks.filter(i => i.done).length;
+      // Stats
+      const totalCount = scheduleData.length;
+      const completedCount = scheduleData.filter(i => i.done).length;
       const pendingCount = totalCount - completedCount;
       const percent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-      const dripCount = plotScopedTasks.filter(i => hasItems(i.drip)).length;
-      const sprayCount = plotScopedTasks.filter(i => hasItems(i.spray)).length;
+      const dripCount = scheduleData.filter(i => hasItems(i.drip)).length;
+      const sprayCount = scheduleData.filter(i => hasItems(i.spray)).length;
 
       document.getElementById('countAll').textContent = totalCount;
       document.getElementById('countPending').textContent = pendingCount;
@@ -2537,7 +2135,6 @@
       document.getElementById('statDripCount').textContent = dripCount;
       document.getElementById('statSprayCount').textContent = sprayCount;
       document.getElementById('statProgress').textContent = `${percent}%`;
-      document.getElementById('statTotalPlotTasks').textContent = totalCount;
 
       const emptyEl = document.getElementById('emptyScheduleState');
       const tableWrapper = document.getElementById('tableContainer');
@@ -2559,23 +2156,19 @@
         }
       }
 
-      // Render Table Rows
+      // Render Table Rows (Both Drip & Spray Side-by-Side)
       const tbody = document.getElementById('scheduleTableBody');
       tbody.innerHTML = '';
 
       filtered.forEach(item => {
         const fmt = formatDateIso(item.date);
         const isToday = isSameOrToday(item.date);
-        const plotObj = getPlotById(item.plotId);
-        const isAllPlots = !item.plotId || item.plotId === 'all';
-        const plotLabel = isAllPlots ? '🌾 All Plots' : `📍 ${plotObj ? plotObj.name : 'Plot'}`;
-        const plotShort = getPlotShortName(item.plotId);
 
         const tr = document.createElement('tr');
         tr.className = `table-row ${item.done ? 'is-done' : ''} ${isToday ? 'is-today' : ''}`;
         tr.id = `row-${item.id}`;
 
-        // Date & Plot Column (With smaller, compact plot number)
+        // Date Column (Compact, Without Day)
         const tdDate = document.createElement('td');
         tdDate.className = 'col-date';
         tdDate.innerHTML = `
@@ -2585,15 +2178,10 @@
               <span class="date-sub tabular-num" style="font-size: 0.72rem; margin: 0;">${fmt.weekday}</span>
               ${isToday ? '<span class="badge-pill" style="font-size: 0.58rem; padding: 0 4px; line-height: 1.2;">Today</span>' : ''}
             </div>
-            <div style="margin-top: 4px;">
-              <span class="table-plot-badge ${isAllPlots ? 'all' : 'specific'}" title="${escapeHtml(plotLabel)}">
-                ${escapeHtml(plotShort)}
-              </span>
-            </div>
           </div>
         `;
 
-        // Drip Cell
+        // Drip Cell (Fertigation)
         const tdDrip = document.createElement('td');
         tdDrip.className = 'col-drip';
         const dripItems = getItemsArray(item.drip);
@@ -2615,7 +2203,7 @@
           tdDrip.innerHTML = `<div class="empty-activity">No drip scheduled</div>`;
         }
 
-        // Spray Cell
+        // Spray Cell (Foliar)
         const tdSpray = document.createElement('td');
         tdSpray.className = 'col-spray';
         const sprayItems = getItemsArray(item.spray);
@@ -2648,7 +2236,7 @@
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
               </svg>
             </button>
-            <button class="btn-icon" style="width: 32px; height: 32px; border-radius: 8px; color: oklch(0.5 0.2 25);" onclick="requestDeleteTask('${item.id}')" title="Delete task" aria-label="Delete task">
+            <button class="btn-icon" style="width: 32px; height: 32px; border-radius: 8px; color: oklch(0.5 0.2 25);" onclick="openDeleteModal('${item.id}')" title="Delete task" aria-label="Delete task">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -2661,6 +2249,7 @@
         tr.appendChild(tdDrip);
         tr.appendChild(tdSpray);
         tr.appendChild(tdActions);
+
         tbody.appendChild(tr);
       });
 
@@ -2669,10 +2258,6 @@
       filtered.forEach(item => {
         const fmt = formatDateIso(item.date);
         const isToday = isSameOrToday(item.date);
-        const plotObj = getPlotById(item.plotId);
-        const isAllPlots = !item.plotId || item.plotId === 'all';
-        const plotLabel = isAllPlots ? '🌾 All Plots' : `📍 ${plotObj ? plotObj.name : 'Plot'}`;
-
         const cardDripItems = getItemsArray(item.drip);
         const cardSprayItems = getItemsArray(item.spray);
 
@@ -2694,10 +2279,7 @@
                   ${fmt.formatted}
                   ${isToday ? '<span class="badge-pill" style="font-size: 0.65rem;">Today</span>' : ''}
                 </div>
-                <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                  <span class="date-sub tabular-num" style="margin: 0;">${fmt.weekday}</span>
-                  <span class="plot-tag ${isAllPlots ? 'all-plot' : 'specific-plot'}">${escapeHtml(plotLabel)}</span>
-                </div>
+                <div class="date-sub tabular-num">${fmt.weekday}</div>
               </div>
             </div>
             <div style="display: flex; gap: 6px;">
@@ -2707,7 +2289,7 @@
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                 </svg>
               </button>
-              <button class="btn-icon" style="width: 36px; height: 36px; border-radius: 9px; color: oklch(0.55 0.22 25);" onclick="requestDeleteTask('${item.id}')" aria-label="Delete task">
+              <button class="btn-icon" style="width: 36px; height: 36px; border-radius: 9px; color: oklch(0.55 0.22 25);" onclick="openDeleteModal('${item.id}')" aria-label="Delete task">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -2761,33 +2343,22 @@
     }
 
     /* --------------------------------------------------------------------------
-       8. WHATSAPP & EXPORT LOGIC
+       6. WHATSAPP INSTRUCTION GENERATOR
        -------------------------------------------------------------------------- */
     function getNextTaskMessage() {
-      // Find next pending task within active plot filter
-      const activeTasks = scheduleData.filter(t => {
-        if (activePlotFilter !== 'all') {
-          return t.plotId === activePlotFilter || t.plotId === 'all';
-        }
-        return true;
-      });
-
-      const sorted = activeTasks.slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      const sorted = scheduleData.slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
       const task = sorted.find(item => !item.done) || sorted[0];
       if (!task) return 'No scheduled pomegranate tasks found.';
-
       const fmt = formatDateIso(task.date);
-      const plot = getPlotById(task.plotId);
-      const plotName = plot ? `${plot.name} (${plot.area})` : 'All Plots (Entire Farm)';
-
       let msg = `🌿 *POMEGRANATE FARM TASK - ${fmt.formatted.toUpperCase()} (${fmt.weekday.toUpperCase()})*\n`;
-      msg += `📍 *PLOT:* ${plotName}\n`;
       msg += `------------------------------------\n`;
       
       const dripList = getItemsArray(task.drip);
       if (dripList.length > 0) {
         msg += `💧 *DRIP FERTIGATION:*\n`;
-        dripList.forEach(it => { msg += `• ${it}\n`; });
+        dripList.forEach(it => {
+          msg += `• ${it}\n`;
+        });
         if (task.drip && task.drip.runtime) msg += `⏱ Runtime: ${task.drip.runtime}\n`;
         msg += `\n`;
       }
@@ -2795,84 +2366,46 @@
       const sprayList = getItemsArray(task.spray);
       if (sprayList.length > 0) {
         msg += `🌿 *FOLIAR SPRAY:*\n`;
-        sprayList.forEach(it => { msg += `• ${it}\n`; });
+        sprayList.forEach(it => {
+          msg += `• ${it}\n`;
+        });
         if (task.spray && task.spray.dose) msg += `💧 Dose: ${task.spray.dose}\n`;
         msg += `\n`;
       }
 
-      msg += `✅ Please confirm once completed.`;
+      msg += `✅ Please confirm once application is done.`;
       return msg;
     }
 
-    function exportToCSV() {
-      scheduleData.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
-      const headers = ["Date", "Weekday", "Plot", "Drip Fertigation", "Drip Runtime", "Foliar Spray", "Spray Dose", "Completed"];
-      const rows = scheduleData.map(item => {
-        const fmt = formatDateIso(item.date);
-        const plot = getPlotById(item.plotId);
-        const plotStr = plot ? `${plot.name} (${plot.area})` : 'All Plots (Entire Farm)';
-
-        return [
-          fmt.formatted,
-          fmt.weekday,
-          plotStr,
-          getItemsText(item.drip),
-          item.drip ? (item.drip.runtime || '') : '',
-          getItemsText(item.spray),
-          item.spray ? (item.spray.dose || '') : '',
-          item.done ? 'Yes' : 'No'
-        ].map(cell => `"${String(cell).replace(/"/g, '""')}"`);
-      });
-
-      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `pomegranate_plots_schedule_${getTodayIso()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showToast('CSV export downloaded successfully!');
-    }
-
-    function copyToClipboard(text, onSuccess) {
-      try {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'fixed';
-        textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        const successful = document.execCommand('copy');
-        document.body.removeChild(textarea);
-        if (successful && onSuccess) {
-          onSuccess();
-          return;
-        }
-      } catch (err) {}
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-          if (onSuccess) onSuccess();
-        }).catch(() => {});
-      }
-    }
-
     /* --------------------------------------------------------------------------
-       9. CRUD OPERATIONS (TASKS & MODALS)
+       7. ACTIONS & CRUD OPERATIONS
        -------------------------------------------------------------------------- */
     function toggleTaskDone(id, isDone) {
       const task = scheduleData.find(t => t.id === id);
       if (task) {
         task.done = isDone;
-        saveScheduleToLocalStorage();
+        saveToLocalStorage();
         renderApp();
-        showToast(isDone ? 'Marked task as completed ✓' : 'Marked task as pending');
       }
     }
 
-    function createFertilizerRowElement(containerId, value = '') {
+    function updateDatePreview() {
+      const dateVal = document.getElementById('inputTaskDate').value;
+      const previewEl = document.getElementById('datePreview');
+      if (dateVal && isValidIsoDate(dateVal)) {
+        const [year, month, dayNum] = dateVal.split('-').map(Number);
+        const dt = new Date(year, month - 1, dayNum);
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const formatted = `${dayNum} ${monthNames[dt.getMonth()]} ${dt.getFullYear()} (${dayNames[dt.getDay()]})`;
+        const isPastDate = dateVal < getTodayIso();
+        previewEl.textContent = `📅 ${formatted}${isPastDate ? ' · past date allowed' : ''}`;
+      } else {
+        previewEl.textContent = '';
+      }
+    }
+
+    function createFertilizerRowElement(containerId, value = '', placeholder = '') {
       const row = document.createElement('div');
       row.className = 'fert-row';
       const defaultPh = containerId === 'dripFertRows' 
@@ -2880,7 +2413,7 @@
         : 'e.g. Copper Oxychloride 50% WP (2.5 g/L)';
       
       row.innerHTML = `
-        <input type="text" class="form-control fert-input" placeholder="${defaultPh}" value="${escapeHtml(value)}">
+        <input type="text" class="form-control fert-input" placeholder="${placeholder || defaultPh}" value="${escapeHtml(value)}">
         <button type="button" class="fert-row-remove" title="Remove line" aria-label="Remove line">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -2894,9 +2427,11 @@
         if (container.children.length > 1) {
           row.remove();
         } else {
+          // If only 1 row left, clear its text instead of removing
           row.querySelector('.fert-input').value = '';
         }
       });
+
       return row;
     }
 
@@ -2905,7 +2440,9 @@
       if (!container) return;
       const row = createFertilizerRowElement(containerId, value);
       container.appendChild(row);
-      if (!value) row.querySelector('.fert-input').focus();
+      if (!value) {
+        row.querySelector('.fert-input').focus();
+      }
     }
 
     function populateFertilizerRows(containerId, items = []) {
@@ -2931,24 +2468,12 @@
       return values;
     }
 
-    function updateDatePreview() {
-      const dateVal = document.getElementById('inputTaskDate').value;
-      const previewEl = document.getElementById('datePreview');
-      if (dateVal && isValidIsoDate(dateVal)) {
-        const fmt = formatDateIso(dateVal);
-        previewEl.textContent = `📅 ${fmt.formatted} (${fmt.weekday})`;
-      } else {
-        previewEl.textContent = '';
-      }
-    }
-
     function openAddTaskModal() {
       document.getElementById('taskForm').reset();
       document.getElementById('editTaskId').value = '';
       document.getElementById('modalHeadingText').textContent = 'Add Schedule Entry';
       
-      // Default to active plot filter if set, otherwise 'all'
-      document.getElementById('inputTaskPlot').value = activePlotFilter === 'all' ? 'all' : activePlotFilter;
+      // Default to today's LOCAL date — past dates are fully allowed
       document.getElementById('inputTaskDate').value = getTodayIso();
       updateDatePreview();
 
@@ -2970,8 +2495,7 @@
 
       document.getElementById('editTaskId').value = task.id;
       const fmt = formatDateIso(task.date);
-      document.getElementById('modalHeadingText').textContent = `Edit Entry · ${fmt.formatted}`;
-      document.getElementById('inputTaskPlot').value = task.plotId || 'all';
+      document.getElementById('modalHeadingText').textContent = `Edit Schedule Entry · ${fmt.formatted}`;
       document.getElementById('inputTaskDate').value = task.date;
       updateDatePreview();
 
@@ -2993,37 +2517,47 @@
       openModal('taskModal');
     }
 
-    function requestDeleteTask(id) {
+    let taskPendingDeleteId = null;
+
+    function openDeleteModal(id) {
       const task = scheduleData.find(t => t.id === id);
       if (!task) return;
 
+      taskPendingDeleteId = id;
       const fmt = formatDateIso(task.date);
-      const plot = getPlotById(task.plotId);
-      const plotName = plot ? plot.name : 'All Plots';
+      const dripList = getItemsArray(task.drip);
+      const sprayList = getItemsArray(task.spray);
 
-      openConfirmModal({
-        title: 'Delete Scheduled Task?',
-        message: 'Are you sure you want to remove this scheduled entry from your pomegranate calendar?',
-        confirmButtonText: 'Delete Task',
-        isDanger: true,
-        previewHtml: `<div style="background:var(--bg-surface-subtle); padding:10px; border-radius:10px; border:1px solid var(--border-color); font-size:0.84rem;">📅 <strong>${fmt.formatted}</strong> · <span style="color:var(--plot-solid);">${plotName}</span></div>`,
-        onConfirm: () => {
-          scheduleData = scheduleData.filter(t => t.id !== id);
-          saveScheduleToLocalStorage();
-          renderApp();
-          showToast('Task removed from schedule');
-        }
-      });
+      let previewHtml = `<div style="font-weight:700; color:var(--text-main); margin-bottom: 2px;">📅 ${fmt.formatted} (${fmt.weekday})</div>`;
+      if (dripList.length > 0) {
+        previewHtml += `<div style="color:var(--drip-solid); font-weight:600;">💧 Drip: ${escapeHtml(dripList.join(', '))}</div>`;
+      }
+      if (sprayList.length > 0) {
+        previewHtml += `<div style="color:var(--spray-solid); font-weight:600;">🌿 Spray: ${escapeHtml(sprayList.join(', '))}</div>`;
+      }
+
+      document.getElementById('deleteTaskPreview').innerHTML = previewHtml;
+      openModal('deleteModal');
+    }
+
+    function confirmDeleteTask() {
+      if (taskPendingDeleteId) {
+        scheduleData = scheduleData.filter(t => t.id !== taskPendingDeleteId);
+        taskPendingDeleteId = null;
+        saveToLocalStorage();
+        closeModal('deleteModal');
+        renderApp();
+      }
     }
 
     function saveTaskFromModal(e) {
       e.preventDefault();
       const id = document.getElementById('editTaskId').value;
       const selectedDate = document.getElementById('inputTaskDate').value;
-      const selectedPlot = document.getElementById('inputTaskPlot').value || 'all';
 
+      // Accept ANY calendar date — past, today or future. No clamping, no Day-N math.
       if (!isValidIsoDate(selectedDate)) {
-        showToast('Please select a valid schedule date.');
+        alert('Please choose a valid schedule date.');
         return;
       }
 
@@ -3046,7 +2580,7 @@
       } : null;
 
       if (!dripObj && !sprayObj) {
-        showToast('Please include at least one Drip or Spray item.');
+        alert('Please fill in at least one fertilizer or spray item.');
         return;
       }
 
@@ -3054,25 +2588,21 @@
         const existing = scheduleData.find(t => t.id === id);
         if (existing) {
           existing.date = selectedDate;
-          existing.plotId = selectedPlot;
           existing.drip = dripObj;
           existing.spray = sprayObj;
-          showToast('Task successfully updated');
         }
       } else {
         const newTask = {
           id: 'pom-custom-' + Date.now(),
-          plotId: selectedPlot,
           date: selectedDate,
           done: false,
           drip: dripObj,
           spray: sprayObj
         };
         scheduleData.push(newTask);
-        showToast('New task scheduled');
       }
 
-      saveScheduleToLocalStorage();
+      saveToLocalStorage();
       closeModal('taskModal');
       renderApp();
     }
@@ -3086,85 +2616,55 @@
       document.getElementById('sprayFieldsContainer').style.pointerEvents = sprayActive ? 'auto' : 'none';
     }
 
-    function resetActivePlotFilter() {
-      activePlotFilter = 'all';
-      localStorage.setItem('agriflow_active_plot_id', 'all');
-      populatePlotDropdowns();
-      renderApp();
-      showToast('Viewing All Plots');
+    /* --------------------------------------------------------------------------
+       8. MODAL CONTROLS (FULL OVERLAY SCROLLING COMPLIANT)
+       -------------------------------------------------------------------------- */
+    function openModal(id) {
+      const el = document.getElementById(id);
+      el.classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
 
-    function openPlotsModalUI() {
-      cancelEditPlot();
-      renderPlotsManagerList();
-      openModal('plotModal');
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      el.classList.remove('open');
+      document.body.style.overflow = '';
     }
 
     /* --------------------------------------------------------------------------
-       10. STORAGE & STATE PERSISTENCE
+       9. EXPORT & CSV GENERATOR
        -------------------------------------------------------------------------- */
-    function saveScheduleToLocalStorage() {
+    function exportToCSV() {
+      scheduleData.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      const headers = ["Date", "Weekday", "Drip Fertigation", "Drip Runtime", "Foliar Spray", "Spray Dose", "Completed"];
+      const rows = scheduleData.map(item => {
+        const fmt = formatDateIso(item.date);
+        return [
+          fmt.formatted,
+          fmt.weekday,
+          getItemsText(item.drip),
+          item.drip ? (item.drip.runtime || '') : '',
+          getItemsText(item.spray),
+          item.spray ? (item.spray.dose || '') : '',
+          item.done ? 'Yes' : 'No'
+        ].map(cell => `"${String(cell).replace(/"/g, '""')}"`);
+      });
+
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `pomegranate_schedule_${getTodayIso()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    /* --------------------------------------------------------------------------
+       10. STORAGE PERSISTENCE
+       -------------------------------------------------------------------------- */
+    function saveToLocalStorage() {
       localStorage.setItem('agriflow_pomegranate_data', JSON.stringify(scheduleData));
-    }
-
-    function savePlotsToLocalStorage() {
-      localStorage.setItem('agriflow_pomegranate_plots', JSON.stringify(plotsData));
-    }
-
-    function loadFromLocalStorage() {
-      // Automatic one-time purge of sample/dummy data from previous runs
-      if (localStorage.getItem('agriflow_dummy_data_purged_v1') !== 'true') {
-        localStorage.removeItem('agriflow_pomegranate_data');
-        localStorage.removeItem('agriflow_pomegranate_plots');
-        localStorage.setItem('agriflow_dummy_data_purged_v1', 'true');
-      }
-
-      // Theme
-      const savedTheme = localStorage.getItem('agriflow_pomegranate_theme');
-      if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
-
-      // View mode
-      const savedView = localStorage.getItem('agriflow_pomegranate_view_mode');
-      if (savedView) currentViewMode = savedView;
-      updateViewModeUI();
-
-      // Plots Data
-      const savedPlots = localStorage.getItem('agriflow_pomegranate_plots');
-      if (savedPlots) {
-        try {
-          plotsData = JSON.parse(savedPlots);
-          if (!Array.isArray(plotsData)) plotsData = [];
-        } catch (e) {
-          plotsData = [];
-        }
-      } else {
-        plotsData = [];
-        savePlotsToLocalStorage();
-      }
-
-      // Active Plot
-      const savedActivePlot = localStorage.getItem('agriflow_active_plot_id');
-      if (savedActivePlot && (savedActivePlot === 'all' || plotsData.some(p => p.id === savedActivePlot))) {
-        activePlotFilter = savedActivePlot;
-      } else {
-        activePlotFilter = 'all';
-      }
-
-      // Schedule Data
-      const savedSchedule = localStorage.getItem('agriflow_pomegranate_data');
-      if (savedSchedule) {
-        try {
-          scheduleData = JSON.parse(savedSchedule);
-          if (!Array.isArray(scheduleData)) scheduleData = [];
-        } catch (e) {
-          scheduleData = [];
-        }
-      } else {
-        scheduleData = [];
-        saveScheduleToLocalStorage();
-      }
-
-      populatePlotDropdowns();
     }
 
     function updateViewModeUI() {
@@ -3185,20 +2685,53 @@
       renderApp();
     }
 
-    function openModal(id) {
-      const el = document.getElementById(id);
-      if (el) {
-        el.classList.add('open');
-        document.body.style.overflow = 'hidden';
+    function loadFromLocalStorage() {
+      const savedTheme = localStorage.getItem('agriflow_pomegranate_theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      }
+
+      const savedView = localStorage.getItem('agriflow_pomegranate_view_mode');
+      if (savedView) {
+        currentViewMode = savedView;
+      } else {
+        currentViewMode = (typeof window !== 'undefined' && window.innerWidth < 768) ? 'cards' : 'table';
+      }
+      updateViewModeUI();
+
+      const savedData = localStorage.getItem('agriflow_pomegranate_data');
+      if (savedData) {
+        try {
+          scheduleData = JSON.parse(savedData);
+          if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
+            scheduleData = buildMasterSchedule();
+            saveToLocalStorage();
+          } else {
+            scheduleData = migrateLegacySchedule(scheduleData);
+            saveToLocalStorage();
+          }
+        } catch(e) {
+          scheduleData = buildMasterSchedule();
+        }
+      } else {
+        scheduleData = buildMasterSchedule();
       }
     }
 
-    function closeModal(id) {
-      const el = document.getElementById(id);
-      if (el) {
-        el.classList.remove('open');
-        document.body.style.overflow = '';
-      }
+    function resetToMasterSchedule() {
+      scheduleData = buildMasterSchedule();
+      saveToLocalStorage();
+      clearFilters();
+    }
+
+    function clearFilters() {
+      activeFilter = 'all';
+      searchQuery = '';
+      document.getElementById('scheduleSearch').value = '';
+      document.querySelectorAll('.chip-filter').forEach(c => {
+        c.classList.toggle('active', c.getAttribute('data-filter') === 'all');
+      });
+      renderApp();
     }
 
     function escapeHtml(str) {
@@ -3218,119 +2751,74 @@
       loadFromLocalStorage();
       renderApp();
 
-      // Theme
       document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
-
-      // Plot Filter Dropdown
-      document.getElementById('activePlotFilterSelect').addEventListener('change', (e) => {
-        activePlotFilter = e.target.value;
-        localStorage.setItem('agriflow_active_plot_id', activePlotFilter);
-        updateActivePlotSummary();
-        renderApp();
-        showToast(activePlotFilter === 'all' ? 'Switched to All Plots' : `Viewing ${getPlotDisplayName(activePlotFilter)}`);
-      });
-
-      // Farm-wide inclusion toggle
-      const chkFarmWide = document.getElementById('chkIncludeFarmWide');
-      if (chkFarmWide) {
-        chkFarmWide.addEventListener('change', () => {
-          renderApp();
-        });
-      }
-
-      // Plot Manager Modal triggers
-      document.getElementById('btnManagePlots').addEventListener('click', () => {
-        renderPlotsManagerList();
-        openModal('plotModal');
-      });
-
-      document.getElementById('btnQuickAddPlot').addEventListener('click', () => {
-        cancelEditPlot();
-        renderPlotsManagerList();
-        openModal('plotModal');
-        document.getElementById('inputPlotName').focus();
-      });
-
-      document.getElementById('btnClosePlotModal').addEventListener('click', () => closeModal('plotModal'));
-      document.getElementById('btnDonePlotsModal').addEventListener('click', () => closeModal('plotModal'));
-      document.getElementById('plotForm').addEventListener('submit', savePlotFromForm);
-      document.getElementById('btnCancelEditPlot').addEventListener('click', cancelEditPlot);
 
       const btnRestore = document.getElementById('btnRestoreDefaults');
       if (btnRestore) {
         btnRestore.addEventListener('click', () => {
-          openConfirmModal({
-            title: 'Clear Schedule?',
-            message: 'Are you sure you want to clear all tasks from the schedule?',
-            confirmButtonText: 'Clear All',
-            isDanger: true,
-            onConfirm: () => {
-              scheduleData = [];
-              saveScheduleToLocalStorage();
-              renderApp();
-              showToast('Schedule cleared.');
-            }
-          });
+          if (confirm('Restore master pomegranate farming schedule? Any custom edits will be replaced.')) {
+            resetToMasterSchedule();
+          }
         });
       }
 
-      // Filter chips
       document.querySelectorAll('.chip-filter').forEach(chip => {
         chip.addEventListener('click', () => {
           document.querySelectorAll('.chip-filter').forEach(c => c.classList.remove('active'));
           chip.classList.add('active');
-          activeStatusFilter = chip.getAttribute('data-filter');
+          activeFilter = chip.getAttribute('data-filter');
           renderApp();
         });
       });
 
-      // Search input
       document.getElementById('scheduleSearch').addEventListener('input', (e) => {
         searchQuery = e.target.value;
         renderApp();
       });
 
-      // View modes
       document.getElementById('viewBtnTable').addEventListener('click', () => setViewMode('table'));
       document.getElementById('viewBtnCards').addEventListener('click', () => setViewMode('cards'));
 
-      // Task modal
-      document.getElementById('btnOpenAddModal').addEventListener('click', openAddTaskModal);
       const fabBtn = document.getElementById('btnFabAddTask');
-      if (fabBtn) fabBtn.addEventListener('click', openAddTaskModal);
+      if (fabBtn) {
+        fabBtn.addEventListener('click', openAddTaskModal);
+      }
 
+      document.getElementById('btnOpenAddModal').addEventListener('click', openAddTaskModal);
       document.getElementById('btnCloseModal').addEventListener('click', () => closeModal('taskModal'));
       document.getElementById('btnCancelModal').addEventListener('click', () => closeModal('taskModal'));
       document.getElementById('taskForm').addEventListener('submit', saveTaskFromModal);
+
+      // Delete confirmation modal listeners
+      document.getElementById('btnCancelDelete').addEventListener('click', () => closeModal('deleteModal'));
+      document.getElementById('btnConfirmDelete').addEventListener('click', confirmDeleteTask);
 
       document.getElementById('inputTaskDate').addEventListener('input', updateDatePreview);
       document.getElementById('inputTaskDate').addEventListener('change', updateDatePreview);
       document.getElementById('inputDripActive').addEventListener('change', toggleDripSprayFields);
       document.getElementById('inputSprayActive').addEventListener('change', toggleDripSprayFields);
 
-      // Confirm modal listeners
-      document.getElementById('btnCancelConfirm').addEventListener('click', () => closeModal('confirmModal'));
-      document.getElementById('btnExecuteConfirm').addEventListener('click', handleConfirmExecution);
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.addEventListener('click', (e) => {
+          if (e.target === backdrop) {
+            closeModal(backdrop.id);
+          }
+        });
+      });
 
-      // Share modal
       document.getElementById('btnOpenShareModal').addEventListener('click', () => {
         const preview = getNextTaskMessage();
         document.getElementById('whatsAppPreviewText').textContent = preview;
-        const plotBadge = document.getElementById('whatsAppPlotBadge');
-        if (plotBadge) {
-          plotBadge.textContent = activePlotFilter === 'all' ? 'All Plots' : getPlotDisplayName(activePlotFilter);
-        }
         openModal('shareModal');
       });
 
       document.getElementById('btnCloseShareModal').addEventListener('click', () => closeModal('shareModal'));
-
+      
       document.getElementById('btnCopyWhatsAppText').addEventListener('click', () => {
         const text = document.getElementById('whatsAppPreviewText').textContent;
-        copyToClipboard(text, () => {
+        navigator.clipboard.writeText(text).then(() => {
           const feedback = document.getElementById('copyFeedbackText');
           feedback.textContent = 'Copied! ✓';
-          showToast('WhatsApp task message copied to clipboard!');
           setTimeout(() => { feedback.textContent = 'Copy Message'; }, 2000);
         });
       });
@@ -3347,20 +2835,11 @@
         window.print();
       });
 
-      // Backdrop click closes modals
-      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-        backdrop.addEventListener('click', (e) => {
-          if (e.target === backdrop) closeModal(backdrop.id);
-        });
-      });
-
-      // Escape key closes modals
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           closeModal('taskModal');
-          closeModal('plotModal');
           closeModal('shareModal');
-          closeModal('confirmModal');
+          closeModal('deleteModal');
         }
       });
     });
